@@ -1,0 +1,26 @@
+{
+  "name": "seoshiro-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node --experimental-strip-types scripts/generate.ts",
+    "dev": "node --experimental-strip-types scripts/generate.ts && node node_modules/vite/bin/vite.js --configLoader native --host 127.0.0.1 --port 5317 --strictPort",
+    "build": "node --experimental-strip-types scripts/generate.ts && node node_modules/typescript/bin/tsc --noEmit && node node_modules/vite/bin/vite.js build --configLoader native && node scripts/harden.mjs && node scripts/verify-artifact.mjs",
+    "preview": "node scripts/serve.mjs",
+    "typecheck": "node node_modules/typescript/bin/tsc --noEmit",
+    "lint": "node node_modules/eslint/bin/eslint.js src scripts tests",
+    "test": "node --experimental-strip-types --test tests/content.test.ts",
+    "test:browser": "node node_modules/@playwright/test/cli.js test"
+  },
+  "devDependencies": {
+    "vite": "7.3.6",
+    "typescript": "5.9.3",
+    "@types/node": "24.19.0",
+    "eslint": "10.11.0",
+    "@eslint/js": "10.0.1",
+    "typescript-eslint": "8.71.0",
+    "@playwright/test": "1.63.0",
+    "@axe-core/playwright": "4.13.0"
+  }
+}

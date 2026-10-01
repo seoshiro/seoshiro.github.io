@@ -1,0 +1,101 @@
+[
+  {
+    "file": "archiveguard-detail.webp",
+    "width": 1280,
+    "height": 1475,
+    "bytes": 97742,
+    "crop": null
+  },
+  {
+    "file": "archiveguard.webp",
+    "width": 1280,
+    "height": 2209,
+    "bytes": 120638,
+    "crop": null
+  },
+  {
+    "file": "archiveguard-preview.webp",
+    "width": 1220,
+    "height": 820,
+    "bytes": 47090,
+    "crop": {
+      "x": 30,
+      "y": 1180,
+      "width": 1220,
+      "height": 820
+    }
+  },
+  {
+    "file": "forme-detail.webp",
+    "width": 1366,
+    "height": 1518,
+    "bytes": 81182,
+    "crop": null
+  },
+  {
+    "file": "forme.webp",
+    "width": 1366,
+    "height": 820,
+    "bytes": 90518,
+    "crop": null
+  },
+  {
+    "file": "forme-preview.webp",
+    "width": 1366,
+    "height": 820,
+    "bytes": 90518,
+    "crop": null
+  },
+  {
+    "file": "guidecheck-detail.webp",
+    "width": 390,
+    "height": 870,
+    "bytes": 23182,
+    "crop": {
+      "x": 0,
+      "y": 2600,
+      "width": 390,
+      "height": 870
+    }
+  },
+  {
+    "file": "guidecheck.webp",
+    "width": 1440,
+    "height": 1866,
+    "bytes": 121320,
+    "crop": null
+  },
+  {
+    "file": "guidecheck-preview.webp",
+    "width": 1440,
+    "height": 1050,
+    "bytes": 80990,
+    "crop": {
+      "x": 0,
+      "y": 180,
+      "width": 1440,
+      "height": 1050
+    }
+  },
+  {
+    "file": "selvedge-detail.webp",
+    "width": 850,
+    "height": 822,
+    "bytes": 23078,
+    "crop": null
+  },
+  {
+    "file": "selvedge.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 48728,
+    "crop": null
+  },
+  {
+    "file": "selvedge-preview.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 48728,
+    "crop": null
+  }
+]

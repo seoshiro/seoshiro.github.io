@@ -1,0 +1,43 @@
+# Content and asset provenance
+
+Public GitHub profile: https://github.com/seoshiro. Working identity supplied by the parent: Beibars Ileskhan / seoshiro, localized as Бейбарс Илесхан and Бейбарыс Ілесхан. No private contact details were used. No claim of sole manual authorship, employment, paid clients, project revenue, awards, or independently certified accessibility is made.
+
+## Project evidence inspected on 1 October 2026
+
+| Project | Source revision | Repository evidence |
+| --- | --- | --- |
+| FORME | `d3760d8fb69f77e3cf41dd5ef911506f7552c67c` | README, `docs/ENGINEERING.md`, `ASSETS.md`, `docs/asset-provenance.json`, source files, media screenshots |
+| SELVEDGE | `3ddd86854e1b89d87425f120a4bb186cf8fd42e1` | README, architecture, provenance and verification notes; original workroom/gallery screenshots |
+| GuideCheck | `205836afe5ebc86adea7a5e56e21d25e00682c1b` | README, `VALIDATION.md`, `QA.md`, source, real browser workspace screenshots |
+| ArchiveGuard | `510929f0155367aa9f2d4422fd7ad8308c413aab` | README, validation, design and third-party notes, source, actual conflict/export screenshots |
+
+Read-only clones are in the sibling `sources/` folder. SELVEDGE was inspected in its existing neighboring checkout. Neither neighboring source repository was modified.
+
+## Screenshots
+
+All portfolio project screens are actual repository captures. Original PNGs are preserved in `docs/originals/`; production WebP versions live in `public/assets/`. No fake product screen, private file, or competitor screenshot was created.
+
+- FORME: `docs/media/editor.png` and `docs/media/design-kit.png`. Source code/screens are MIT; the demo includes Unsplash photography covered by the source project's retained provenance and free Unsplash license. These images are used as screenshots of the real application, not as a stock-photo service.
+- SELVEDGE: `docs/gallery/02-studio.png` and `03-revisions.png`. Original garment illustration and After Hours artwork, with synthetic project data, MIT.
+- GuideCheck: `evidence/guidecheck-desktop.png` and `guidecheck-mobile.png`. Original synthetic Atlas demo data in the real workspace.
+- ArchiveGuard: `docs/screenshots/desktop-conflict.png` and `desktop-export.png`. Real application with original synthetic archive fixtures.
+
+`scripts/optimize-assets.mjs` creates WebP copies at quality 0.87, preserving screenshots' color/layout. It crops only these specific images:
+
+- GuideCheck gallery: x0, y180, 1440 × 1050, emphasizing the guide and comparison.
+- ArchiveGuard gallery: x30, y1180, 1220 × 820, emphasizing the metadata conflict and explicit decisions.
+- GuideCheck case detail: x0, y2600, 390 × 870, emphasizing the mobile human-review form.
+
+No content is added to those crops. Full desktop screenshots remain available on the case pages. Dimensions, byte sizes, and crop coordinates are recorded in `docs/assets.json`.
+
+## Fonts and original graphics
+
+- Manrope variable TTF copied from FORME's vendored Google Fonts asset. SIL OFL 1.1; license retained at `public/fonts/Manrope-OFL.txt`.
+- IBM Plex Sans Regular and Medium WOFF2 copied from ArchiveGuard's official vendored IBM font package. SIL OFL 1.1; license retained at `public/fonts/IBMPlexSans-LICENSE.txt`. Used explicitly for Russian and Kazakh.
+- Favicon, wordmark treatment, layout, CSS interactions, and parametric ribbon geometry were created for this portfolio. The ribbon is simple mathematical geometry, rendered locally with Canvas2D; no image-generation or paid rendering service was used.
+
+## References
+
+The parent provided research on Dennis Snellenberg, Rauno Freiberg, Emil Kowalski, Brittany Chiang, and Lynn Fisher. Their work informed hierarchy, clarity, and restrained interaction principles. No source code, screenshots, logos, or other site assets were copied.
+
+Dependencies are development-only and pinned in `package-lock.json`. Production has no framework/3D dependency. Bundled package licenses remain in their installed packages; npm audit reported zero known vulnerabilities on this date.
