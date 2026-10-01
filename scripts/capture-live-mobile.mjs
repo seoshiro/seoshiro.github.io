@@ -87,6 +87,10 @@ try {
         section: "gallery-full",
         url: page.url(),
       });
+      // The full-gallery capture can make another local font face eligible.
+      // Complete those requests before intentionally leaving the document.
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForLoadState("networkidle");
       const caseUrl = new URL(
         `projects/archiveguard.html?lang=${locale}`,
         base,
