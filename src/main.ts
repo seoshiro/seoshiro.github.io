@@ -140,4 +140,8 @@ async function settleInitialFragment() {
   }
 }
 void settleInitialFragment();
-window.addEventListener("pagehide", () => cleanup(), { once: true });
+window.addEventListener("pagehide", (event) => {
+  // Cached pages are frozen, then restored with their existing listeners.
+  // Visibility already suspends drawing while the document is hidden.
+  if (!event.persisted) cleanup();
+});

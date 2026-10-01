@@ -1,5 +1,5 @@
 /* global scrollY, HTMLButtonElement */
-import { test, expect } from "@playwright/test";
+import { test, expect, chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { copy, locales, projects } from "../src/content.ts";
 const routes = ["/", ...projects.map((p) => `/projects/${p.id}.html`)];
@@ -503,15 +503,65 @@ test("Work navigation exposes cards promptly at full opacity", async ({
   await expect(page.locator(".project-forme .project-visual")).toBeInViewport({
     timeout: 2000,
   });
-  const states = await page
-    .locator(".project-card")
-    .evaluateAll((cards) =>
-      cards.map((card) => ({
-        opacity: getComputedStyle(card).opacity,
-        animation: getComputedStyle(card).animationName,
-      })),
-    );
+  const states = await page.locator(".project-card").evaluateAll((cards) =>
+    cards.map((card) => ({
+      opacity: getComputedStyle(card).opacity,
+      animation: getComputedStyle(card).animationName,
+    })),
+  );
   expect(states.every((s) => s.opacity === "1" && s.animation === "none")).toBe(
     true,
   );
+});
+
+test("Real cached browser Back keeps motion and language controls usable", async ({
+  baseURL,
+}, testInfo) => {
+  const browser = await chromium.launch({
+    ...testInfo.project.use.launchOptions,
+    // Playwright disables this browser feature by default.
+    ignoreDefaultArgs: ["--disable-back-forward-cache"],
+  });
+  try {
+    const page = await browser.newPage({
+      viewport: { width: 1440, height: 1000 },
+    });
+    await page.addInitScript(() => {
+      window.addEventListener("pageshow", (event) => {
+        document.documentElement.dataset.historyCache = String(event.persisted);
+      });
+    });
+    await page.goto(baseURL || liveBase);
+    await page.locator("#motion-toggle").click();
+    await page.locator(".project-forme .project-visual").click();
+    await page.goBack({ waitUntil: "commit" });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-history-cache",
+      "true",
+    );
+    await expect(page.locator("#motion-toggle")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await page.locator("#motion-toggle").click();
+    await expect(page.locator("#motion-toggle")).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await page.locator('[data-locale="ru"]').click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
+    await page.locator(".project-forme .project-visual").click();
+    await page.goBack({ waitUntil: "commit" });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-history-cache",
+      "true",
+    );
+    await page.locator("#motion-toggle").click();
+    await expect(page.locator("#motion-toggle")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  } finally {
+    await browser.close();
+  }
 });
