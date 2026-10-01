@@ -1,5 +1,31 @@
 import type { Page } from "@playwright/test";
 
+export async function sculptureFrameChange(page: Page, reset = false) {
+  return page.locator("#sculpture").evaluate((node, reset) => {
+    const canvas = node as HTMLCanvasElement & {
+      __qaBaseline?: Uint8ClampedArray;
+    };
+    const pixels = canvas
+      .getContext("2d")!
+      .getImageData(0, 0, canvas.width, canvas.height).data;
+    if (reset || !canvas.__qaBaseline) {
+      canvas.__qaBaseline = pixels;
+      return 0;
+    }
+    let changed = 0;
+    const baseline = canvas.__qaBaseline;
+    for (let i = 0; i < pixels.length; i += 4) {
+      const difference =
+        Math.abs(pixels[i] - baseline[i]) +
+        Math.abs(pixels[i + 1] - baseline[i + 1]) +
+        Math.abs(pixels[i + 2] - baseline[i + 2]) +
+        Math.abs(pixels[i + 3] - baseline[i + 3]);
+      if (difference > 50) changed++;
+    }
+    return changed / (canvas.width * canvas.height);
+  }, reset);
+}
+
 export async function sculptureMeasurements(page: Page) {
   return page.locator("#sculpture").evaluate((node) => {
     const canvas = node as HTMLCanvasElement;

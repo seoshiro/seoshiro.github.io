@@ -41,6 +41,8 @@ Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/App
 
 `node scripts/capture-sculpture.mjs https://seoshiro.github.io/ evidence/sculpture/after` records the mobile sculpture at 320/360/390/414px in every language, two landscape widths, and six animation phases. Its controlled Playwright clock executes each animation frame. `node scripts/sculpture-performance.mjs` separately measures actual drawing callbacks with normal and 4x CPU throttling.
 
+`node scripts/check-sculpture-rhythm.mjs` records uninterrupted real-time mobile playback at 0/0.5/1/2/4 seconds. Both motion-check scripts accept a source URL and output destination. The mobile camera cycles take about 5.5-7 seconds of active time; pausing or leaving the viewport preserves its current orientation.
+
 ## Source map
 
 - `src/content.ts`: all verified project links and complete EN/RU/KK catalogs.

@@ -1,5 +1,8 @@
 import { chromium } from "@playwright/test";
-import { writeFile } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
+const base = process.argv[2] || "http://127.0.0.1:5317/";
+const output = process.argv[3] || "evidence/sculpture/performance.json";
 const browser = await chromium.launch({
   headless: true,
   executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -16,6 +19,7 @@ try {
     await client.send("Emulation.setCPUThrottlingRate", { rate: cpuSlowdown });
     await page.addInitScript(() => {
       window.__ribbonSamples = [];
+      window.__ribbonTimes = [];
       let paints = 0;
       const seen = new WeakSet();
       const getContext = HTMLCanvasElement.prototype.getContext;
@@ -37,22 +41,29 @@ try {
           const before = paints,
             start = performance.now();
           callback(now);
-          if (paints > before)
+          if (paints > before) {
             window.__ribbonSamples.push(performance.now() - start);
+            window.__ribbonTimes.push(now);
+          }
         });
     });
-    await page.goto("http://127.0.0.1:5317/");
+    await page.goto(base);
     await page.evaluate(() => document.fonts.ready);
     await page.locator("#motion-toggle").click();
     await page.evaluate(() => {
       window.scrollTo({ top: 0, behavior: "instant" });
       window.__ribbonSamples = [];
+      window.__ribbonTimes = [];
     });
     await page.waitForTimeout(2500);
     const measurement = await page.evaluate(() => {
       const samples = window.__ribbonSamples.slice().sort((a, b) => a - b);
       const canvas = document.querySelector("canvas");
+      const times = window.__ribbonTimes;
       return {
+        release: document.querySelector('meta[name="portfolio-build"]')
+          ?.content,
+        drawFps: ((times.length - 1) * 1000) / (times.at(-1) - times[0]),
         samples: samples.length,
         meanMs: samples.reduce((sum, value) => sum + value, 0) / samples.length,
         p95Ms: samples[Math.floor((samples.length - 1) * 0.95)],
@@ -67,8 +78,9 @@ try {
 } finally {
   await browser.close();
 }
+await mkdir(dirname(output), { recursive: true });
 await writeFile(
-  "evidence/sculpture/performance.json",
+  output,
   JSON.stringify(
     {
       method:

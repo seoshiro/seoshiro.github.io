@@ -58,6 +58,8 @@ export function startSculpture(
     frame = 0,
     last = 0,
     phase = 0.35,
+    mobileSeconds = 0,
+    mobileLast = 0,
     pointerX = 0,
     pointerY = 0,
     targetX = 0,
@@ -87,7 +89,7 @@ export function startSculpture(
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.clearRect(0, 0, size, height);
     const pose = isMobile
-      ? mobilePose(phase)
+      ? mobilePose(mobileSeconds)
       : {
           yaw: phase * 0.16 + 0.65 + pointerX * 0.18,
           pitch: -0.65 + pointerY * 0.14,
@@ -144,6 +146,10 @@ export function startSculpture(
     }
     if (now - last >= 1000 / 30) {
       last = now;
+      if (mobile.matches) {
+        if (mobileLast) mobileSeconds += Math.min(now - mobileLast, 100) / 1000;
+        mobileLast = now;
+      }
       phase += 0.012;
       pointerX += (targetX - pointerX) * 0.035;
       pointerY += (targetY - pointerY) * 0.035;
@@ -154,6 +160,7 @@ export function startSculpture(
   function sync() {
     if (frame) cancelAnimationFrame(frame);
     frame = 0;
+    mobileLast = 0;
     label();
     draw();
     if (!paused && visible && !document.hidden)

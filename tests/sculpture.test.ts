@@ -24,3 +24,21 @@ test("Mobile camera stays frontal and varied across repeated animation cycles", 
   }
   assert.ok(maxYaw - minYaw > 0.15, "The bounded camera must still move.");
 });
+
+test("Mobile motion is perceptible within the first half-second and retains its still pose", () => {
+  const start = mobilePose(0),
+    halfSecond = mobilePose(0.5),
+    oneSecond = mobilePose(1);
+  assert.ok(Math.abs(start.yaw - (0.36 + Math.sin(0.35 * 0.4) * 0.12)) < 1e-12);
+  assert.ok(
+    Math.abs(start.pitch - (-0.24 + Math.cos(0.35 * 0.32) * 0.06)) < 1e-12,
+  );
+  assert.ok(
+    Math.abs(halfSecond.yaw - start.yaw) > 0.05,
+    "Motion should be visible within 0.5s.",
+  );
+  assert.ok(
+    Math.abs(oneSecond.yaw - start.yaw) > 0.09,
+    "The first second should feel active.",
+  );
+});

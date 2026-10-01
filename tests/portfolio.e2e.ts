@@ -4,10 +4,67 @@ import AxeBuilder from "@axe-core/playwright";
 import { copy, locales, projects } from "../src/content.ts";
 import {
   installPausedClock,
+  sculptureFrameChange,
   sculptureMeasurements,
 } from "./sculpture-helpers.ts";
 const routes = ["/", ...projects.map((p) => `/projects/${p.id}.html`)];
 const liveBase = process.env.LIVE_URL || "http://127.0.0.1:5317";
+
+test("Mobile sculpture moves visibly within half a second and resumes without a time jump", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 1100 },
+    deviceScaleFactor: 2,
+  });
+  const page = await context.newPage();
+  try {
+    const pause = await installPausedClock(page);
+    await page.goto(liveBase);
+    await page.evaluate(() => document.fonts.ready);
+    await pause();
+    await page.locator("#motion-toggle").click();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.clock.runFor(48);
+    await sculptureFrameChange(page, true);
+    let previous = 0;
+    for (const seconds of [0.5, 1, 2, 4]) {
+      await page.clock.runFor((seconds - previous) * 1000);
+      previous = seconds;
+      const difference = await sculptureFrameChange(page);
+      expect(difference, `${seconds}s visible movement`).toBeGreaterThan(0.1);
+      const m = await sculptureMeasurements(page);
+      expect(m.paint.aspect).toBeGreaterThan(0.85);
+      expect(m.paint.top).toBeGreaterThan(2);
+      expect(m.paint.bottom).toBeLessThan(m.canvas.height - 2);
+    }
+    await page.locator("#motion-toggle").click();
+    const still = await page
+      .locator("canvas")
+      .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL());
+    await page.clock.runFor(120000);
+    await expect(page.locator("#motion-toggle")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(
+      await page
+        .locator("canvas")
+        .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+    ).toBe(still);
+    await page.locator("#motion-toggle").click();
+    expect(
+      await page
+        .locator("canvas")
+        .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+    ).toBe(still);
+    await sculptureFrameChange(page, true);
+    await page.clock.runFor(500);
+    expect(await sculptureFrameChange(page)).toBeGreaterThan(0.025);
+  } finally {
+    await context.close();
+  }
+});
 test("Mobile sculpture is centered, contained and sharp in portrait and landscape", async ({
   browser,
 }) => {
