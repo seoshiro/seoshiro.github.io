@@ -4,6 +4,109 @@ import AxeBuilder from "@axe-core/playwright";
 import { copy, locales, projects } from "../src/content.ts";
 const routes = ["/", ...projects.map((p) => `/projects/${p.id}.html`)];
 const liveBase = process.env.LIVE_URL || "http://127.0.0.1:5317";
+test("Small-screen case names wrap only at whole project-name boundaries", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const titles = {
+    forme: ["FORME."],
+    selvedge: ["SELVEDGE."],
+    guidecheck: ["Guide", "Check."],
+    archiveguard: ["Archive", "Guard."],
+  };
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const locale of locales)
+      for (const project of projects) {
+        await page.goto(`/projects/${project.id}.html?lang=${locale}`);
+        await page.evaluate(() => document.fonts.ready);
+        await expect(page.locator("h1")).toHaveText(`${project.name}.`);
+        await expect(page.locator(".case-title-word")).toHaveText(
+          titles[project.id],
+        );
+        for (const scale of [1, 2]) {
+          await page.evaluate((scale) => {
+            document.documentElement.style.fontSize = scale === 2 ? "200%" : "";
+          }, scale);
+          const layout = await page.locator("h1").evaluate((heading) => {
+            const bounds = heading.getBoundingClientRect();
+            const style = getComputedStyle(heading);
+            return {
+              font: parseFloat(style.fontSize),
+              lineHeight: parseFloat(style.lineHeight),
+              left: bounds.left,
+              right: bounds.right,
+              words: [...heading.querySelectorAll(".case-title-word")].map(
+                (word) => {
+                  const rect = word.getBoundingClientRect();
+                  return {
+                    text: word.textContent,
+                    left: rect.left,
+                    right: rect.right,
+                    height: rect.height,
+                  };
+                },
+              ),
+            };
+          });
+          expect(
+            layout.font,
+            `${project.id} ${locale} ${width}px scale ${scale}`,
+          ).toBeGreaterThanOrEqual(40);
+          for (const word of layout.words) {
+            expect(word.height, word.text!).toBeLessThanOrEqual(
+              layout.lineHeight + 1,
+            );
+            expect(word.left).toBeGreaterThanOrEqual(layout.left - 1);
+            expect(word.right).toBeLessThanOrEqual(layout.right + 1);
+          }
+        }
+      }
+  }
+});
+
+test("Mobile ribbon stays below the hero action across languages and enlarged text", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const width of [320, 390, 760]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const locale of locales) {
+      await page.goto(`/?lang=${locale}`);
+      await page.evaluate(() => document.fonts.ready);
+      for (const scale of [1, 2]) {
+        await page.evaluate((scale) => {
+          document.documentElement.style.fontSize = scale === 2 ? "200%" : "";
+        }, scale);
+        const button = await page.locator(".hero .pill-link").boundingBox();
+        const ribbon = await page.locator(".sculpture").boundingBox();
+        const intro = await page.locator(".hero-intro").boundingBox();
+        expect(
+          ribbon!.y - (button!.y + button!.height),
+          `${locale} ${width}px scale ${scale}`,
+        ).toBeGreaterThanOrEqual(24);
+        expect(intro!.y).toBeGreaterThanOrEqual(ribbon!.y + ribbon!.height);
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await page.locator(".hero .pill-link").evaluate((element) => {
+          for (const animation of element.getAnimations()) {
+            animation.pause();
+            animation.currentTime = 0;
+          }
+        });
+        const animatedButton = await page
+          .locator(".hero .pill-link")
+          .boundingBox();
+        const animatedRibbon = await page.locator(".sculpture").boundingBox();
+        expect(
+          animatedRibbon!.y - (animatedButton!.y + animatedButton!.height),
+          `${locale} ${width}px entrance frame`,
+        ).toBeGreaterThanOrEqual(12);
+        await page.emulateMedia({ reducedMotion: "reduce" });
+      }
+    }
+  }
+});
+
 for (const locale of locales) {
   test(`All ${locale} routes expose complete content, safe links and zero accessibility violations`, async ({
     page,
@@ -280,7 +383,7 @@ test("200 percent zoom and enlarged text retain readable content and navigation"
 }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
   for (const locale of locales) {
-    for (const route of ["/", "/projects/archiveguard.html"]) {
+    for (const route of routes) {
       await page.goto(`${route}?lang=${locale}`);
       await page.evaluate(() => {
         document.body.style.zoom = "2";

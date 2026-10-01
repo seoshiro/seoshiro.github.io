@@ -3,7 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { settle } from "./capture-helpers.mjs";
 
 const base = new URL(process.argv[2] || "https://seoshiro.github.io/");
-const output = "evidence/live-mobile";
+const output = process.argv[3] || "evidence/live-mobile";
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({
   headless: true,
@@ -113,6 +113,20 @@ try {
         );
       await capture("archiveguard-details");
       await capture("archiveguard-full", true);
+      for (const project of ["forme", "selvedge", "guidecheck"]) {
+        await page.evaluate(() => document.fonts.ready);
+        await page.waitForLoadState("networkidle");
+        const url = new URL(`projects/${project}.html?lang=${locale}`, base);
+        const response = await page.goto(url.href);
+        if (response?.status() !== 200) throw Error(`Case load failed: ${url}`);
+        await settle(page, true);
+        const release = await page
+          .locator('meta[name="portfolio-build"]')
+          .getAttribute("content");
+        if (release !== manifest.release) throw Error("Case release mismatch.");
+        await observe(url.href);
+        await capture(`${project}-open`);
+      }
       if (errors.length)
         throw Error(`Browser errors: ${JSON.stringify(errors)}`);
       await context.close();
@@ -129,13 +143,16 @@ const escape = (value) =>
     .replaceAll('"', "&quot;");
 await writeFile(
   `${output}/index.html`,
-  `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Live mobile portfolio evidence</title><style>body{font:16px system-ui;background:#eef0f3;color:#17202c;margin:32px}main{max-width:1200px;margin:auto}.grid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}figure{margin:0;width:min(100%,390px)}img{max-width:100%;height:auto;display:block}figcaption{margin:8px 0 14px;overflow-wrap:anywhere}h2{margin-top:48px}a{color:#103caf}</style><main><h1>Actual live mobile captures</h1><p>Release <code>${escape(manifest.release)}</code>. Captured ${escape(manifest.capturedAt)} from <a href="${escape(base.href)}">${escape(base.href)}</a>. Chromium, 320/390 × 844 CSS pixels, DPR 1, reduced motion. All captures use actual deployed pages and real repository images. No browser errors or horizontal overflow occurred in the twelve captured pages.</p><p><a href="manifest.json">Machine-readable manifest</a>. ArchiveGuard is the long case study. Full-section images intentionally extend vertically.</p>${[
+  `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Live mobile portfolio evidence</title><style>body{font:16px system-ui;background:#eef0f3;color:#17202c;margin:32px}main{max-width:1200px;margin:auto}.grid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}figure{margin:0;width:min(100%,390px)}img{max-width:100%;height:auto;display:block}figcaption{margin:8px 0 14px;overflow-wrap:anywhere}h2{margin-top:48px}a{color:#103caf}</style><main><h1>Mobile browser captures</h1><p>Release <code>${escape(manifest.release)}</code>. Captured ${escape(manifest.capturedAt)} from <a href="${escape(base.href)}">${escape(base.href)}</a>. Chromium, 320/390 × 844 CSS pixels, DPR 1, reduced motion. All captures use actual browser pages and real repository images. No browser errors or horizontal overflow occurred in the ${manifest.observations.length} captured pages.</p><p><a href="manifest.json">Machine-readable manifest</a>. ArchiveGuard is the long case study. Full-section images intentionally extend vertically.</p>${[
     "hero",
     "gallery",
     "gallery-full",
     "archiveguard-open",
     "archiveguard-details",
     "archiveguard-full",
+    "forme-open",
+    "selvedge-open",
+    "guidecheck-open",
   ]
     .map(
       (section) =>

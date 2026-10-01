@@ -37,6 +37,8 @@ Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/App
 
 `scripts/capture.mjs round-3` and `scripts/capture-cases.mjs` regenerate the visual handoff. Captures wait for visible images to decode and the compositor to settle. `scripts/performance.mjs` records local throttled measurements, not field performance or a Lighthouse certification.
 
+`node scripts/capture-live-mobile.mjs https://seoshiro.github.io/` captures 320/390px EN/RU/KK heroes, galleries, all four case openings, and the long ArchiveGuard case. The output includes an HTML evidence index and a release/overflow/error manifest. An optional third argument chooses a local evidence directory; use the loopback URL to inspect an unpublished production preview.
+
 ## Source map
 
 - `src/content.ts`: all verified project links and complete EN/RU/KK catalogs.

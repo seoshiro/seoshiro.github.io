@@ -615,6 +615,7 @@ figure {
 }
 .case-header {
   padding: 3rem var(--gutter) 4rem;
+  container-type: inline-size;
 }
 .back-link {
   display: inline-flex;
@@ -633,8 +634,13 @@ figure {
 }
 .case-header h1 {
   font-size: clamp(4.5rem, 9vw, 10rem);
+  font-size: min(clamp(4.5rem, 9vw, 10rem), 21cqi);
   margin-top: 1rem;
   overflow-wrap: anywhere;
+}
+.case-title-word {
+  display: inline-block;
+  white-space: nowrap;
 }
 .case-intro {
   display: grid;
@@ -1044,6 +1050,7 @@ html[lang="kk"] .about h2 {
   }
   .case-header h1 {
     font-size: clamp(3.5rem, 13vw, 6rem);
+    font-size: min(clamp(3.5rem, 13vw, 6rem), 21cqi);
   }
   .case-intro {
     display: block;
@@ -1289,9 +1296,14 @@ p {
 }
 @media (max-width: 760px) {
   .sculpture {
-    width: 54%;
-    right: 0;
-    top: 21rem;
+    position: relative;
+    width: min(60%, 15rem);
+    margin: 2rem 0 0 auto;
+    right: auto;
+    top: auto;
+  }
+  .hero-bottom {
+    margin-top: 0.5rem;
   }
   .hero-intro {
     background: #111214;
