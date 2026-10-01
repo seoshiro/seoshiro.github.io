@@ -1,4 +1,5 @@
 import { copy, type Locale } from "./content.ts";
+import { mobilePose } from "./sculpture-view.ts";
 type Point = [number, number, number];
 type Patch = { points: Point[]; depth: number; shade: number; stripe: number };
 const center = (u: number): Point => [
@@ -70,20 +71,32 @@ export function startSculpture(
     button!.querySelector("span:first-child")!.textContent = paused ? "▷" : "Ⅱ";
   }
   function draw() {
-    const ratio = Math.min(window.devicePixelRatio || 1, 1.5);
+    const isMobile = mobile.matches;
+    const ratio = Math.min(
+      window.devicePixelRatio || 1,
+      isMobile && !conn?.saveData ? 2 : 1.5,
+    );
     size = Math.min(Math.max(canvas!.clientWidth, 200), 700);
+    const height = isMobile ? canvas!.clientHeight : size;
     const pixels = Math.round(size * ratio);
-    if (canvas!.width !== pixels) {
+    const pixelHeight = Math.round(height * ratio);
+    if (canvas!.width !== pixels || canvas!.height !== pixelHeight) {
       canvas!.width = pixels;
-      canvas!.height = pixels;
+      canvas!.height = pixelHeight;
     }
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.clearRect(0, 0, size, size);
+    context.clearRect(0, 0, size, height);
+    const pose = isMobile
+      ? mobilePose(phase)
+      : {
+          yaw: phase * 0.16 + 0.65 + pointerX * 0.18,
+          pitch: -0.65 + pointerY * 0.14,
+        };
     const patches: Patch[] = [],
-      segments = 104,
+      segments = isMobile ? 128 : 104,
       stripes = 9,
-      a = phase * 0.16 + 0.65 + pointerX * 0.18,
-      b = -0.65 + pointerY * 0.14;
+      a = pose.yaw,
+      b = pose.pitch;
     for (let i = 0; i < segments; i++) {
       const u = (i / segments) * Math.PI * 2,
         u2 = ((i + 1.035) / segments) * Math.PI * 2;
@@ -105,7 +118,7 @@ export function startSculpture(
       }
     }
     patches.sort((a, b) => a.depth - b.depth);
-    const scale = size * 0.154;
+    const scale = isMobile ? Math.min(size, height) * 0.16 : size * 0.154;
     for (const patch of patches) {
       const shade = patch.shade;
       const pearl = patch.stripe < 3 || patch.stripe > 6;
@@ -116,7 +129,7 @@ export function startSculpture(
       patch.points.forEach((p, i) => {
         const perspective = 8 / (8 - p[2] * 0.35),
           x = size * 0.5 + p[0] * scale * perspective,
-          y = size * 0.5 + p[1] * scale * perspective;
+          y = height * 0.5 + p[1] * scale * perspective;
         if (i) context.lineTo(x, y);
         else context.moveTo(x, y);
       });
@@ -168,7 +181,7 @@ export function startSculpture(
   const onVisibility = () => sync();
   document.addEventListener("visibilitychange", onVisibility);
   const onPointer = (event: PointerEvent) => {
-    if (paused || event.pointerType !== "mouse") return;
+    if (paused || mobile.matches || event.pointerType !== "mouse") return;
     targetX = (event.clientX / window.innerWidth - 0.5) * 2;
     targetY = (event.clientY / window.innerHeight - 0.5) * 2;
   };

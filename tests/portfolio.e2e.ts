@@ -2,8 +2,136 @@
 import { test, expect, chromium } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { copy, locales, projects } from "../src/content.ts";
+import {
+  installPausedClock,
+  sculptureMeasurements,
+} from "./sculpture-helpers.ts";
 const routes = ["/", ...projects.map((p) => `/projects/${p.id}.html`)];
 const liveBase = process.env.LIVE_URL || "http://127.0.0.1:5317";
+test("Mobile sculpture is centered, contained and sharp in portrait and landscape", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    deviceScaleFactor: 3,
+    reducedMotion: "reduce",
+  });
+  const page = await context.newPage();
+  try {
+    for (const [width, height] of [
+      [320, 900],
+      [360, 900],
+      [390, 900],
+      [414, 900],
+      [640, 360],
+      [760, 414],
+    ]) {
+      await page.setViewportSize({ width, height });
+      for (const locale of locales) {
+        await page.goto(new URL(`?lang=${locale}`, liveBase).href);
+        await page.evaluate(() => document.fonts.ready);
+        const m = await sculptureMeasurements(page);
+        expect(
+          Math.abs(m.centerOffset),
+          `${width} ${locale} center`,
+        ).toBeLessThanOrEqual(1);
+        expect(m.buffer.ratioX).toBeCloseTo(2, 1);
+        expect(m.buffer.ratioY).toBeCloseTo(2, 1);
+        expect(m.buffer.bytes).toBeLessThanOrEqual(1024 * 1024);
+        expect(m.paint.left).toBeGreaterThan(2);
+        expect(m.paint.top).toBeGreaterThan(2);
+        expect(m.paint.right).toBeLessThan(m.canvas.width - 2);
+        expect(m.paint.bottom).toBeLessThan(m.canvas.height - 2);
+        expect(m.paint.width / m.canvas.width).toBeGreaterThan(0.6);
+        expect(m.paint.height / m.canvas.height).toBeGreaterThan(0.7);
+        expect(m.actionGap).toBeGreaterThanOrEqual(31);
+        expect(m.introGap).toBeGreaterThanOrEqual(0);
+        expect(m.documentWidth).toBeLessThanOrEqual(width + 1);
+      }
+    }
+  } finally {
+    await context.close();
+  }
+  const saver = await browser.newContext({
+    viewport: { width: 390, height: 900 },
+    deviceScaleFactor: 3,
+  });
+  try {
+    const page = await saver.newPage();
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "connection", {
+        value: { saveData: true },
+        configurable: true,
+      });
+      localStorage.setItem("seoshiro-portfolio-motion-v1", "playing");
+    });
+    await page.goto(liveBase);
+    await expect(page.locator("#motion-toggle")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    const m = await sculptureMeasurements(page);
+    expect(m.buffer.ratioX).toBeCloseTo(1.5, 1);
+    expect(m.buffer.ratioY).toBeCloseTo(1.5, 1);
+  } finally {
+    await saver.close();
+  }
+});
+
+test("Mobile ribbon stays legible and unclipped across motion phases and still pauses", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    viewport: { width: 360, height: 900 },
+    deviceScaleFactor: 2,
+  });
+  const page = await context.newPage();
+  try {
+    const pause = await installPausedClock(page);
+    await page.goto(new URL("?lang=ru", liveBase).href);
+    await page.evaluate(() => document.fonts.ready);
+    await pause();
+    await page.locator("#motion-toggle").click();
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.clock.runFor(48);
+    let previous = 0;
+    const images = new Set<string>();
+    for (const seconds of [0, 8, 16, 24, 40, 64]) {
+      if (seconds > previous)
+        await page.clock.runFor((seconds - previous) * 1000);
+      previous = seconds;
+      const m = await sculptureMeasurements(page);
+      expect(m.paint.aspect, `${seconds}s silhouette`).toBeGreaterThan(0.85);
+      expect(m.paint.aspect).toBeLessThan(1.25);
+      expect(m.paint.top, `${seconds}s top edge`).toBeGreaterThan(2);
+      expect(m.paint.bottom).toBeLessThan(m.canvas.height - 2);
+      expect(m.paint.width / m.canvas.width).toBeGreaterThan(0.6);
+      expect(m.actionGap).toBeGreaterThan(12);
+      expect(m.introGap).toBeGreaterThanOrEqual(0);
+      images.add(
+        await page
+          .locator("canvas")
+          .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+      );
+    }
+    expect(images.size).toBe(6);
+    await page.locator("#motion-toggle").click();
+    const still = await page
+      .locator("canvas")
+      .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL());
+    await page.clock.runFor(8000);
+    expect(
+      await page
+        .locator("canvas")
+        .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+    ).toBe(still);
+    await expect(page.locator("#motion-toggle")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  } finally {
+    await context.close();
+  }
+});
 test("Small-screen case names wrap only at whole project-name boundaries", async ({
   page,
 }) => {

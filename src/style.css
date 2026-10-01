@@ -1297,10 +1297,17 @@ p {
 @media (max-width: 760px) {
   .sculpture {
     position: relative;
-    width: min(60%, 15rem);
-    margin: 2rem 0 0 auto;
+    width: min(100%, 288px);
+    aspect-ratio: 4 / 3;
+    margin: 2rem auto 0;
     right: auto;
     top: auto;
+    opacity: 1;
+  }
+  .sculpture canvas {
+    position: absolute;
+    inset: 0;
+    opacity: 1;
   }
   .hero-bottom {
     margin-top: 0.5rem;

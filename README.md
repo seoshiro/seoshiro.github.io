@@ -39,6 +39,8 @@ Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/App
 
 `node scripts/capture-live-mobile.mjs https://seoshiro.github.io/` captures 320/390px EN/RU/KK heroes, galleries, all four case openings, and the long ArchiveGuard case. The output includes an HTML evidence index and a release/overflow/error manifest. An optional third argument chooses a local evidence directory; use the loopback URL to inspect an unpublished production preview.
 
+`node scripts/capture-sculpture.mjs https://seoshiro.github.io/ evidence/sculpture/after` records the mobile sculpture at 320/360/390/414px in every language, two landscape widths, and six animation phases. Its controlled Playwright clock executes each animation frame. `node scripts/sculpture-performance.mjs` separately measures actual drawing callbacks with normal and 4x CPU throttling.
+
 ## Source map
 
 - `src/content.ts`: all verified project links and complete EN/RU/KK catalogs.
@@ -54,7 +56,7 @@ Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/App
 
 ## Motion and privacy
 
-The sculpture uses no WebGL or 3D library. It paints at up to 30fps, caps pixel ratio at 1.5, and stops offscreen or when the page is hidden. Mobile, reduced motion, and Save-Data start with a static frame. The visitor can play or pause it; the choice survives language changes, reloads, and case-study navigation. System reduced motion takes precedence over a saved play choice on entry. Missing Canvas hides only the decoration and its control. All content is available without animation; useful English content also works without JavaScript.
+The sculpture uses no WebGL or 3D library. It paints at up to 30fps and stops offscreen or when the page is hidden. Desktop and Save-Data cap pixel ratio at 1.5; other mobile contexts cap it at 2, within a 576 x 432 pixel buffer (under 1 MiB). The centered mobile stage uses a bounded camera so the ribbon stays open throughout its animation. Mobile, reduced motion, and Save-Data start with a static frame. The visitor can play or pause it; the choice survives language changes, reloads, and case-study navigation. System reduced motion takes precedence over a saved play choice on entry. Missing Canvas hides only the decoration and its control. All content is available without animation; useful English content also works without JavaScript.
 
 A language code and an optional explicit motion choice are persisted under `seoshiro-portfolio-language-v1` and `seoshiro-portfolio-motion-v1`. If persistent motion storage is denied, tab storage is tried; if both are denied, the controls still work on the current page. No contact email, private details, employment claims, testimonials, fabricated impact metrics, or client relationships are included. External project links open on explicit navigation. Assets and fonts load locally.
 
