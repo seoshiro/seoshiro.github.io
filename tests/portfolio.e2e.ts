@@ -495,10 +495,22 @@ test("Direct and reloaded localized section links settle on their actual content
       await expect(page.locator(target)).toBeInViewport({ timeout: 3000 });
     }
 });
-test("Work navigation exposes cards promptly at full opacity", async ({
+test("Entrance motion keeps hero text and promptly exposed cards at full opacity", async ({
   page,
 }) => {
   await page.goto("/");
+  const heroOpacity = await page
+    .locator(".hero-name, .hero-phrase, .hero-text > .pill-link")
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        for (const animation of element.getAnimations()) {
+          animation.pause();
+          animation.currentTime = 0;
+        }
+        return getComputedStyle(element).opacity;
+      }),
+    );
+  expect(heroOpacity).toEqual(["1", "1", "1"]);
   await page.locator('.header nav a[href="#work"]').click();
   await expect(page.locator(".project-forme .project-visual")).toBeInViewport({
     timeout: 2000,
@@ -512,6 +524,19 @@ test("Work navigation exposes cards promptly at full opacity", async ({
   expect(states.every((s) => s.opacity === "1" && s.animation === "none")).toBe(
     true,
   );
+  await page.locator(".principles").scrollIntoViewIfNeeded();
+  const principleOpacity = await page
+    .locator(".principles li")
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        for (const animation of element.getAnimations()) {
+          animation.pause();
+          animation.currentTime = 0;
+        }
+        return getComputedStyle(element).opacity;
+      }),
+    );
+  expect(principleOpacity.every((opacity) => opacity === "1")).toBe(true);
 });
 
 test("Real cached browser Back keeps motion and language controls usable", async ({
@@ -519,6 +544,8 @@ test("Real cached browser Back keeps motion and language controls usable", async
 }, testInfo) => {
   const browser = await chromium.launch({
     ...testInfo.project.use.launchOptions,
+    // Full Chromium supports page-history caching; the CI headless shell does not.
+    channel: "chromium",
     // Playwright disables this browser feature by default.
     ignoreDefaultArgs: ["--disable-back-forward-cache"],
   });
