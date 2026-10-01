@@ -400,3 +400,118 @@ test("First useful content arrives before the runtime script", async ({
   await expect(page.locator("h1")).toContainText("FORME");
   await expect(page.locator("main")).toContainText(copy.en.project.forme.limit);
 });
+
+test("Manual pause persists after reload and a case-study round trip", async ({
+  page,
+}) => {
+  await page.goto("/?lang=kk");
+  await page.locator("#motion-toggle").click();
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.reload();
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.locator(".project-forme .project-visual").click();
+  await page.locator(".back-link").click();
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(page.locator("#motion-toggle")).toContainText(copy.kk.motionOn);
+});
+test("Saved play cannot override system reduced motion", async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem("seoshiro-portfolio-motion-v1", "playing"),
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+test("Motion preference uses tab storage when persistent storage is denied", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new Error("Denied");
+      },
+    }),
+  );
+  await page.goto("/");
+  await page.locator("#motion-toggle").click();
+  await page.reload();
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+});
+test("Denied preference stores preserve usable in-page motion controls", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    for (const key of ["localStorage", "sessionStorage"])
+      Object.defineProperty(window, key, {
+        get() {
+          throw new Error("Denied");
+        },
+      });
+  });
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await page.locator("#motion-toggle").click();
+  await page.locator('[data-locale="ru"]').click();
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.locator("#motion-toggle").click();
+  await expect(page.locator("#motion-toggle")).toHaveAttribute(
+    "aria-pressed",
+    "false",
+  );
+  expect(errors).toEqual([]);
+});
+test("Direct and reloaded localized section links settle on their actual content", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const locale of locales)
+    for (const anchor of ["work", "about", "contact"]) {
+      await page.goto(`/?lang=${locale}#${anchor}`);
+      await page.evaluate(() => document.fonts.ready);
+      const target =
+        anchor === "work" ? ".project-forme .project-visual" : `#${anchor} h2`;
+      await expect(page.locator(target)).toBeInViewport({ timeout: 3000 });
+      await page.reload();
+      await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator(target)).toBeInViewport({ timeout: 3000 });
+    }
+});
+test("Work navigation exposes cards promptly at full opacity", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.locator('.header nav a[href="#work"]').click();
+  await expect(page.locator(".project-forme .project-visual")).toBeInViewport({
+    timeout: 2000,
+  });
+  const states = await page
+    .locator(".project-card")
+    .evaluateAll((cards) =>
+      cards.map((card) => ({
+        opacity: getComputedStyle(card).opacity,
+        animation: getComputedStyle(card).animationName,
+      })),
+    );
+  expect(states.every((s) => s.opacity === "1" && s.animation === "none")).toBe(
+    true,
+  );
+});

@@ -52,9 +52,9 @@ Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/App
 
 ## Motion and privacy
 
-The sculpture uses no WebGL or 3D library. It paints at up to 30fps, caps pixel ratio at 1.5, and stops offscreen or when the page is hidden. Mobile, reduced motion, and Save-Data start with a static frame. The visitor can play or pause it; pause survives language changes. Missing Canvas hides only the decoration and its control. All content is available without animation; useful English content also works without JavaScript.
+The sculpture uses no WebGL or 3D library. It paints at up to 30fps, caps pixel ratio at 1.5, and stops offscreen or when the page is hidden. Mobile, reduced motion, and Save-Data start with a static frame. The visitor can play or pause it; the choice survives language changes, reloads, and case-study navigation. System reduced motion takes precedence over a saved play choice on entry. Missing Canvas hides only the decoration and its control. All content is available without animation; useful English content also works without JavaScript.
 
-Only a language code is persisted under `seoshiro-portfolio-language-v1`. Storage denial is handled. No contact email, private details, employment claims, testimonials, fabricated impact metrics, or client relationships are included. External project links open on explicit navigation. Assets and fonts load locally.
+A language code and an optional explicit motion choice are persisted under `seoshiro-portfolio-language-v1` and `seoshiro-portfolio-motion-v1`. If persistent motion storage is denied, tab storage is tried; if both are denied, the controls still work on the current page. No contact email, private details, employment claims, testimonials, fabricated impact metrics, or client relationships are included. External project links open on explicit navigation. Assets and fonts load locally.
 
 ## Release boundary
 

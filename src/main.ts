@@ -1,6 +1,7 @@
 import { copy, validLocale, projectById, type Locale } from "./content.ts";
 import { renderPage } from "./render.ts";
 import { startSculpture } from "./sculpture.ts";
+import { readMotionPreference, saveMotionPreference } from "./preferences.ts";
 const id = projectById(document.body.dataset.project || "")?.id || null;
 const query = new URL(window.location.href);
 let stored: string | null = null;
@@ -12,7 +13,7 @@ try {
 let locale =
   validLocale(query.searchParams.get("lang")) || validLocale(stored) || "en";
 let cleanup: () => void = () => {};
-let motionPreference: boolean | undefined;
+let motionPreference: boolean | undefined = readMotionPreference();
 function enhance() {
   document.documentElement.lang = locale;
   document.title = id
@@ -31,8 +32,9 @@ function enhance() {
   document
     .querySelector('meta[property="og:title"]')
     ?.setAttribute("content", document.title);
-  cleanup = startSculpture(locale, motionPreference, (value) => {
+  cleanup = startSculpture(locale, motionPreference, (value, manual) => {
     motionPreference = value;
+    if (manual) saveMotionPreference(value);
   });
   document.querySelectorAll<HTMLImageElement>("img").forEach((img) => {
     const fail = () => {
@@ -53,9 +55,7 @@ function enhance() {
         switchLanguage(validLocale(button.dataset.locale || null)!),
       ),
     );
-  const links = [
-    ...document.querySelectorAll<HTMLElement>(".project-card,.principles li"),
-  ];
+  const links = [...document.querySelectorAll<HTMLElement>(".principles li")];
   if (
     !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
     "IntersectionObserver" in window
@@ -109,4 +109,35 @@ function switchLanguage(next: Locale) {
 if (locale !== "en")
   document.getElementById("app")!.innerHTML = renderPage(locale, id);
 enhance();
+async function settleInitialFragment() {
+  const originalHash = query.hash;
+  const targetId = originalHash.slice(1);
+  if (!["main", "work", "about", "contact"].includes(targetId)) return;
+  let cancelled = false;
+  const cancel = () => {
+    cancelled = true;
+  };
+  window.addEventListener("wheel", cancel, { passive: true });
+  window.addEventListener("touchstart", cancel, { passive: true });
+  window.addEventListener("keydown", cancel);
+  try {
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve()),
+    );
+    await document.fonts.ready;
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve()),
+    );
+    if (!cancelled && window.location.hash === originalHash) {
+      document
+        .getElementById(targetId)
+        ?.scrollIntoView({ behavior: "instant", block: "start" });
+    }
+  } finally {
+    window.removeEventListener("wheel", cancel);
+    window.removeEventListener("touchstart", cancel);
+    window.removeEventListener("keydown", cancel);
+  }
+}
+void settleInitialFragment();
 window.addEventListener("pagehide", () => cleanup(), { once: true });

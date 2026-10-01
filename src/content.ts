@@ -160,7 +160,7 @@ export const copy: Record<Locale, Copy> = {
     source: "Source code",
     role: "PROJECT CONTEXT",
     roleText:
-      "Independent portfolio project. The source repository documents the implementation, design decisions, and verification. Demo content is fictional; no client commission is implied.",
+      "Independent portfolio project. Implementation, design decisions, and verification are documented in the source repository.",
     input: "Starting point",
     output: "What you leave with",
     engineering: "Under the surface",
@@ -307,7 +307,7 @@ export const copy: Record<Locale, Copy> = {
     source: "Исходный код",
     role: "КОНТЕКСТ ПРОЕКТА",
     roleText:
-      "Личный проект для портфолио. В репозитории описаны реализация, дизайн и проверки. Демонстрационные данные вымышлены; проект не представлен как заказ клиента.",
+      "Личный проект для портфолио. Реализация, дизайн и результаты проверок описаны в репозитории.",
     input: "С чего начинается",
     output: "Что получается",
     engineering: "Как устроено",
@@ -452,7 +452,7 @@ export const copy: Record<Locale, Copy> = {
     source: "Бастапқы код",
     role: "ЖОБА КОНТЕКСТІ",
     roleText:
-      "Портфолиоға арналған жеке жоба. Репозиторийде іске асыру, дизайн шешімдері мен тексерулер сипатталған. Демо деректер ойдан шығарылған; клиент тапсырысы туралы мәлімдеме жоқ.",
+      "Портфолиоға арналған жеке жоба. Іске асыру, дизайн шешімдері мен тексерулер репозиторийде сипатталған.",
     input: "Бастапқы нүкте",
     output: "Нәтижесінде",
     engineering: "Ішкі құрылымы",

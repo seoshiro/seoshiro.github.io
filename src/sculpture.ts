@@ -28,7 +28,7 @@ function rotate(p: Point, a: number, b: number): Point {
 export function startSculpture(
   locale: Locale,
   preference?: boolean,
-  onPreference?: (paused: boolean) => void,
+  onPreference?: (paused: boolean, manual: boolean) => void,
 ): () => void {
   const canvas = document.querySelector<HTMLCanvasElement>("#sculpture"),
     button = document.getElementById("motion-toggle");
@@ -148,14 +148,14 @@ export function startSculpture(
   }
   const onClick = () => {
     paused = !paused;
-    onPreference?.(paused);
+    onPreference?.(paused, true);
     sync();
   };
   button.addEventListener("click", onClick);
   const onReduce = () => {
     if (reduce.matches) {
       paused = true;
-      onPreference?.(paused);
+      onPreference?.(paused, false);
     }
     sync();
   };
