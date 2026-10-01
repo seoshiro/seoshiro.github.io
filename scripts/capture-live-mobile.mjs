@@ -113,7 +113,7 @@ try {
         );
       await capture("archiveguard-details");
       await capture("archiveguard-full", true);
-      for (const project of ["forme", "selvedge", "guidecheck"]) {
+      for (const project of ["perch", "forme", "selvedge", "guidecheck"]) {
         await page.evaluate(() => document.fonts.ready);
         await page.waitForLoadState("networkidle");
         const url = new URL(`projects/${project}.html?lang=${locale}`, base);
@@ -150,6 +150,7 @@ await writeFile(
     "archiveguard-open",
     "archiveguard-details",
     "archiveguard-full",
+    "perch-open",
     "forme-open",
     "selvedge-open",
     "guidecheck-open",

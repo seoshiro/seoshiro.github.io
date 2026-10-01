@@ -7,6 +7,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: resolve("index.html"),
+        perch: resolve("projects/perch.html"),
         forme: resolve("projects/forme.html"),
         selvedge: resolve("projects/selvedge.html"),
         guidecheck: resolve("projects/guidecheck.html"),

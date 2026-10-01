@@ -6,6 +6,7 @@ Public GitHub profile: https://github.com/seoshiro. Working identity supplied by
 
 | Project | Source revision | Repository evidence |
 | --- | --- | --- |
+| PERCH | `952559edaf2d036d9e2205d733cfbd6a220b5a78` | README, `docs/ARCHITECTURE.md`, `docs/AUDITS.md`, model and renderer source; fresh live studio and comparison captures |
 | FORME | `d3760d8fb69f77e3cf41dd5ef911506f7552c67c` | README, `docs/ENGINEERING.md`, `ASSETS.md`, `docs/asset-provenance.json`, source files, media screenshots |
 | SELVEDGE | `3ddd86854e1b89d87425f120a4bb186cf8fd42e1` | README, architecture, provenance and verification notes; original workroom/gallery screenshots |
 | GuideCheck | `205836afe5ebc86adea7a5e56e21d25e00682c1b` | README, `VALIDATION.md`, `QA.md`, source, real browser workspace screenshots |
@@ -18,6 +19,7 @@ Read-only clones are in the sibling `sources/` folder. SELVEDGE was inspected in
 All portfolio project screens are actual repository captures. Original PNGs are preserved in `docs/originals/`; production WebP versions live in `public/assets/`. No fake product screen, private file, or competitor screenshot was created.
 
 - FORME: `docs/media/editor.png` and `docs/media/design-kit.png`. Source code/screens are MIT; the demo includes Unsplash photography covered by the source project's retained provenance and free Unsplash license. These images are used as screenshots of the real application, not as a stock-photo service.
+- PERCH: `scripts/capture-perch.mjs` captures the actual deployed furnished demo at 1440 × 1000, then creates an independent copy, changes its sofa width, and captures the native comparison dialog at 980 × 620. The app's original parametric assets and code are MIT. Full PNGs are retained; WebP copies use quality 0.87 with no cropping. No source project was modified.
 - SELVEDGE: `docs/gallery/02-studio.png` and `03-revisions.png`. Original garment illustration and After Hours artwork, with synthetic project data, MIT.
 - GuideCheck: `evidence/guidecheck-desktop.png` and `guidecheck-mobile.png`. Original synthetic Atlas demo data in the real workspace.
 - ArchiveGuard: `docs/screenshots/desktop-conflict.png` and `desktop-export.png`. Real application with original synthetic archive fixtures.

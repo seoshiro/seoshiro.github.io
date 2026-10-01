@@ -352,11 +352,23 @@ figure {
   gap: 5rem 2.5rem;
   align-items: start;
 }
-.project-card:nth-child(2) {
+.project-card:nth-child(odd):not(.project-perch) {
   margin-top: 6rem;
 }
-.project-card:nth-child(4) {
-  margin-top: 6rem;
+.project-perch {
+  grid-column: 1 / -1;
+}
+.project-perch .project-visual {
+  aspect-ratio: 1.65;
+  padding: 1.75rem;
+}
+.project-perch .project-visual img {
+  width: auto;
+  max-width: 100%;
+  min-height: 0;
+}
+.project-perch > p {
+  max-width: 700px;
 }
 .project-visual {
   display: flex;
@@ -849,7 +861,7 @@ html[lang="kk"] .about h2 {
   .project-grid {
     gap: 3rem 1.5rem;
   }
-  .project-card:nth-child(even) {
+  .project-card:nth-child(odd):not(.project-perch) {
     margin-top: 4rem;
   }
   .project-visual {
@@ -970,8 +982,16 @@ html[lang="kk"] .about h2 {
     grid-template-columns: 1fr;
     gap: 3.5rem;
   }
-  .project-card:nth-child(even) {
+  .project-card:nth-child(odd):not(.project-perch) {
     margin-top: 0;
+  }
+  .project-perch .project-visual {
+    aspect-ratio: auto;
+    padding: 1rem;
+  }
+  .project-perch .project-visual img {
+    width: 100%;
+    max-height: none;
   }
   .project-visual {
     aspect-ratio: 1.25;

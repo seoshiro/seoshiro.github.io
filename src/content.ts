@@ -5,9 +5,21 @@ export function validLocale(value: string | null): Locale | null {
 }
 export const projects = [
   {
+    id: "perch",
+    name: "PERCH",
+    category: "01 / SPATIAL TOOLS",
+    stack: ["React", "TypeScript", "Three.js", "SVG"],
+    live: "https://seoshiro.github.io/perch-studio/",
+    source: "https://github.com/seoshiro/perch-studio",
+    evidence: "https://github.com/seoshiro/perch-studio/blob/main/docs/AUDITS.md",
+    color: "#b9c18f",
+    width: 1440,
+    height: 1000,
+  },
+  {
     id: "forme",
     name: "FORME",
-    category: "01 / VISUAL DIRECTION",
+    category: "02 / VISUAL DIRECTION",
     stack: ["React", "TypeScript", "Web Workers", "IndexedDB"],
     live: "https://forme-studio-coral.vercel.app/",
     source: "https://github.com/seoshiro/forme-studio",
@@ -20,7 +32,7 @@ export const projects = [
   {
     id: "selvedge",
     name: "SELVEDGE",
-    category: "02 / CREATIVE TOOLS",
+    category: "03 / CREATIVE TOOLS",
     stack: ["React", "TypeScript", "Canvas", "IndexedDB"],
     live: "https://seoshiro.github.io/selvedge-studio/",
     source: "https://github.com/seoshiro/selvedge-studio",
@@ -33,7 +45,7 @@ export const projects = [
   {
     id: "guidecheck",
     name: "GuideCheck",
-    category: "03 / REVIEW SYSTEMS",
+    category: "04 / REVIEW SYSTEMS",
     stack: ["TypeScript", "IndexedDB", "SQLite", "Playwright"],
     live: "https://seoshiro.github.io/guidecheck/",
     source: "https://github.com/seoshiro/guidecheck",
@@ -45,7 +57,7 @@ export const projects = [
   {
     id: "archiveguard",
     name: "ArchiveGuard",
-    category: "04 / FILE INTEGRITY",
+    category: "05 / FILE INTEGRITY",
     stack: ["TypeScript", "Web Workers", "Web Crypto", "EXIF"],
     live: "https://seoshiro.github.io/archiveguard/",
     source: "https://github.com/seoshiro/archiveguard",
@@ -65,6 +77,7 @@ export const dimensions: Record<
     detail: [number, number];
   }
 > = {
+  perch: { main: [1440, 1000], preview: [1440, 1000], detail: [980, 620] },
   forme: { main: [1366, 820], preview: [1366, 820], detail: [1366, 1518] },
   selvedge: { main: [1440, 1000], preview: [1440, 1000], detail: [850, 822] },
   guidecheck: { main: [1440, 1866], preview: [1440, 1050], detail: [390, 870] },
@@ -154,7 +167,7 @@ export const copy: Record<Locale, Copy> = {
     heroFoot: "Independent projects. Open source. Built for the browser.",
     selected: "Selected work",
     selectedNote:
-      "Four projects. Different problems. The same attention to detail.",
+      "Five projects. Different problems. The same attention to detail.",
     caseStudy: "Inside the project",
     live: "Live project",
     source: "Source code",
@@ -193,6 +206,27 @@ export const copy: Record<Locale, Copy> = {
     imageFailed:
       "Project screenshot unavailable. The case study and live project are still accessible.",
     project: {
+      perch: {
+        category: "SPATIAL TOOLS",
+        title: "A room.\nA few possibilities.",
+        summary:
+          "A local-first furniture planner with linked 2D and 3D views. Shape the room, arrange 12 parametric furniture types, and compare layouts before moving anything.",
+        alt: "Actual PERCH studio showing a furnished living room in 3D beside its dimensioned 2D plan",
+        detailAlt: "Actual PERCH comparison of two independently editable living-room layouts",
+        input:
+          "A rectangular room, its measurements and openings, and furniture you want to make space for.",
+        output:
+          "Editable layout alternatives, fit notes, a portable JSON project, a dimensioned SVG plan, a 3D PNG, and a printable room report.",
+        decisions: [
+          "One room model drives the SVG plan and original Three.js furniture. Numeric edits, plan dragging, and 3D selection stay in sync.",
+          "Rotated footprints, room bounds, ceiling height, and inward door swings produce fit warnings. Copies remain independent; undo and redo preserve the editing history.",
+          "Browser-local saves include a recovery backup. Rendering runs on demand; the plan and forms remain usable without WebGL. The whole workspace supports English, Russian, and Kazakh.",
+        ],
+        limit:
+          "A furnishing study for rectangular rooms, not a construction or safety document. Materials and light are illustrative; fit notes do not certify walking clearance. No cloud sync or collaboration. Export JSON to move work between devices.",
+        caption:
+          "Fresh captures of the live studio and two layout alternatives, using its furnished demo room.",
+      },
       forme: {
         category: "VISUAL DIRECTION",
         title: "From references\nto a direction.",
@@ -301,7 +335,7 @@ export const copy: Record<Locale, Copy> = {
     heroFoot: "Личные проекты. Открытый код. Работа в браузере.",
     selected: "Избранные проекты",
     selectedNote:
-      "Четыре проекта. Разные задачи. Одинаковое внимание к деталям.",
+      "Пять проектов. Разные задачи. Одинаковое внимание к деталям.",
     caseStudy: "О проекте",
     live: "Открыть проект",
     source: "Исходный код",
@@ -340,6 +374,27 @@ export const copy: Record<Locale, Copy> = {
     imageFailed:
       "Снимок проекта недоступен. Описание и ссылка на проект остаются доступны.",
     project: {
+      perch: {
+        category: "ПРОСТРАНСТВЕННЫЕ ИНСТРУМЕНТЫ",
+        title: "Одна комната.\nНесколько вариантов.",
+        summary:
+          "Локальный планировщик мебели с общими 2D- и 3D-видами. Задайте комнату, расставьте 12 параметрических типов мебели и сравните варианты до перестановки.",
+        alt: "Настоящая студия PERCH: меблированная гостиная в 3D рядом с её 2D-планом и размерами",
+        detailAlt: "Настоящее сравнение двух независимых вариантов расстановки гостиной в PERCH",
+        input:
+          "Прямоугольная комната, её размеры и проёмы, а также мебель, для которой нужно найти место.",
+        output:
+          "Редактируемые варианты расстановки, замечания о размещении, JSON-проект, SVG-план с размерами, PNG из 3D-вида и отчёт для печати.",
+        decisions: [
+          "Единая модель комнаты управляет SVG-планом и оригинальной мебелью Three.js. Числовые правки, перетаскивание на плане и выбор в 3D синхронизированы.",
+          "Поворот мебели, границы комнаты, высота потолка и открывание дверей внутрь учитываются в предупреждениях. Копии независимы; изменения можно отменять и повторять.",
+          "Локальное сохранение в браузере включает резервную копию. Сцена рисуется по запросу; план и формы работают без WebGL. Весь интерфейс доступен на английском, русском и казахском.",
+        ],
+        limit:
+          "Эскиз расстановки для прямоугольных комнат, а не строительный документ или оценка безопасности. Материалы и свет условны; замечания не подтверждают нормы проходов. Облачной синхронизации и совместной работы нет. Для переноса на другое устройство экспортируйте JSON.",
+        caption:
+          "Свежие снимки работающей студии и двух вариантов расстановки на примере её демонстрационной комнаты.",
+      },
       forme: {
         category: "ВИЗУАЛЬНОЕ НАПРАВЛЕНИЕ",
         title: "От референсов\nк направлению.",
@@ -446,7 +501,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Жобаларды көру",
     heroFoot: "Жеке жобалар. Ашық код. Браузерде жұмыс істейді.",
     selected: "Таңдаулы жобалар",
-    selectedNote: "Төрт жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
+    selectedNote: "Бес жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
     caseStudy: "Жоба туралы",
     live: "Жобаны ашу",
     source: "Бастапқы код",
@@ -485,6 +540,27 @@ export const copy: Record<Locale, Copy> = {
     imageFailed:
       "Жоба суреті қолжетімсіз. Сипаттама мен жоба сілтемесі қолжетімді.",
     project: {
+      perch: {
+        category: "КЕҢІСТІК ҚҰРАЛДАРЫ",
+        title: "Бір бөлме.\nБірнеше мүмкіндік.",
+        summary:
+          "2D және 3D көріністері байланысқан жергілікті жиһаз жоспарлаушысы. Бөлмені баптап, 12 параметрлік жиһаз түрін орналастырыңыз және жылжытпас бұрын нұсқаларды салыстырыңыз.",
+        alt: "Нақты PERCH студиясы: жиһаздалған қонақ бөлменің 3D көрінісі және өлшемдері бар 2D жоспары",
+        detailAlt: "PERCH ішіндегі қонақ бөлменің екі тәуелсіз орналасу нұсқасын нақты салыстыру",
+        input:
+          "Тікбұрышты бөлме, оның өлшемдері мен есік-терезелері және орналастырғыңыз келетін жиһаз.",
+        output:
+          "Өңделетін орналасу нұсқалары, сыйымдылық ескертулері, JSON жобасы, өлшемдері бар SVG жоспар, 3D PNG және басып шығаруға арналған бөлме есебі.",
+        decisions: [
+          "Бір бөлме моделі SVG жоспар мен түпнұсқа Three.js жиһазын басқарады. Сандық өңдеу, жоспарда сүйреу және 3D таңдау өзара синхрондалады.",
+          "Жиһаздың бұрылуы, бөлме шекарасы, төбе биіктігі және ішке ашылатын есіктер ескертулерде ескеріледі. Көшірмелер тәуелсіз; өзгерістерді болдырмауға және қайталауға болады.",
+          "Браузердегі жергілікті сақтау қалпына келтіру көшірмесін қамтиды. Сахна қажет кезде салынады; жоспар мен өрістер WebGL болмаса да жұмыс істейді. Толық интерфейс ағылшын, орыс және қазақ тілдерінде қолжетімді.",
+        ],
+        limit:
+          "Тікбұрышты бөлмені жиһаздау нобайы, құрылыс немесе қауіпсіздік құжаты емес. Материалдар мен жарық шартты; ескертулер өту жолдарының талаптарға сай екенін растамайды. Бұлттық синхрондау және бірлескен жұмыс жоқ. Басқа құрылғыға көшу үшін JSON экспорттаңыз.",
+        caption:
+          "Жұмыс істейтін студия мен екі орналасу нұсқасының жаңа скриншоттары; жиһаздалған демо бөлме қолданылды.",
+      },
       forme: {
         category: "ВИЗУАЛДЫ БАҒЫТ",
         title: "Референстерден\nнақты бағытқа.",

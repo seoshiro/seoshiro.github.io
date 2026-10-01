@@ -8,5 +8,5 @@ writeFileSync("index.html", template(null));
 for (const p of projects)
   writeFileSync(`projects/${p.id}.html`, template(p.id));
 console.log(
-  "Generated home and four case studies with readable static content.",
+  `Generated home and ${projects.length} case studies with readable static content.`,
 );

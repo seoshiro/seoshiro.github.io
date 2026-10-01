@@ -97,5 +97,26 @@
     "height": 1000,
     "bytes": 48728,
     "crop": null
+  },
+  {
+    "file": "perch.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 71330,
+    "crop": null
+  },
+  {
+    "file": "perch-preview.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 71330,
+    "crop": null
+  },
+  {
+    "file": "perch-detail.webp",
+    "width": 980,
+    "height": 620,
+    "bytes": 18774,
+    "crop": null
   }
 ]

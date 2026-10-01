@@ -4,7 +4,7 @@ const root = resolve("dist"),
   records = [];
 for (const file of [
   "index.html",
-  ...["forme", "selvedge", "guidecheck", "archiveguard"].map(
+  ...["perch", "forme", "selvedge", "guidecheck", "archiveguard"].map(
     (id) => `projects/${id}.html`,
   ),
 ]) {

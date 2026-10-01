@@ -1,6 +1,6 @@
 # seoshiro — personal developer portfolio
 
-A local, static portfolio for Beibars Ileskhan / seoshiro. The home page introduces four real projects; separate case-study pages explain inputs, outputs, engineering decisions, and limits. Complete English, Russian, and Kazakh UI and case-study copy is included.
+A local, static portfolio for Beibars Ileskhan / seoshiro. The home page introduces five real projects, led by PERCH; separate case-study pages explain inputs, outputs, engineering decisions, and limits. Complete English, Russian, and Kazakh UI and case-study copy is included.
 
 This checkout is isolated from SELVEDGE and the GitHub profile repository. Publication was authorized on 1 October 2026. The new public repository is `seoshiro/seoshiro.github.io`, with GitHub Pages at https://seoshiro.github.io/. No tunnel, analytics, backend, new credentials, broader grants, or paid service was created.
 
@@ -33,11 +33,11 @@ npm test
 npm run test:browser
 ```
 
-Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/Application/chrome.exe`, with isolated contexts and synthetic browser state. The preview server starts automatically if needed. They cover all five routes, every locale, 320/390/768/1440/1920px, 200% zoom and text enlargement, keyboard navigation, axe accessibility checks, unavailable storage and Canvas, failed screenshots, motion lifecycle, internal links, metadata, static HTML, and security boundaries.
+Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/Application/chrome.exe`, with isolated contexts and synthetic browser state. The preview server starts automatically if needed. They cover all six routes, every locale, 320/390/768/1440/1920px, 200% zoom and text enlargement, keyboard navigation, axe accessibility checks, unavailable storage and Canvas, failed screenshots, motion lifecycle, internal links, metadata, static HTML, and security boundaries.
 
 `scripts/capture.mjs round-3` and `scripts/capture-cases.mjs` regenerate the visual handoff. Captures wait for visible images to decode and the compositor to settle. `scripts/performance.mjs` records local throttled measurements, not field performance or a Lighthouse certification.
 
-`node scripts/capture-live-mobile.mjs https://seoshiro.github.io/` captures 320/390px EN/RU/KK heroes, galleries, all four case openings, and the long ArchiveGuard case. The output includes an HTML evidence index and a release/overflow/error manifest. An optional third argument chooses a local evidence directory; use the loopback URL to inspect an unpublished production preview.
+`node scripts/capture-live-mobile.mjs https://seoshiro.github.io/` captures 320/390px EN/RU/KK heroes, galleries, all five case openings, and the long ArchiveGuard case. The output includes an HTML evidence index and a release/overflow/error manifest. An optional third argument chooses a local evidence directory; use the loopback URL to inspect an unpublished production preview.
 
 `node scripts/capture-sculpture.mjs https://seoshiro.github.io/ evidence/sculpture/after` records the mobile sculpture at 320/360/390/414px in every language, two landscape widths, and six animation phases. Its controlled Playwright clock executes each animation frame. `node scripts/sculpture-performance.mjs` separately measures actual drawing callbacks with normal and 4x CPU throttling.
 
@@ -50,7 +50,7 @@ Browser tests use installed Google Chrome at `C:/Program Files/Google/Chrome/App
 - `src/main.ts`: language preferences, focus preservation, image-failure states.
 - `src/sculpture.ts`: an original parametric ribbon knot projected with Canvas2D.
 - `src/style.css`: authored editorial layout, responsive behavior, and motion.
-- `scripts/generate.ts`: home and four case pages with useful HTML before JavaScript.
+- `scripts/generate.ts`: home and five case pages with useful HTML before JavaScript.
 - `scripts/harden.mjs`: production-only static CSP, compatible with hosting without custom headers.
 - `scripts/serve.mjs`: loopback-only production preview, restricted to `dist/`.
 - `docs/AUDITS.md`: three distinct audits, visual passes, fixes, and evidence.

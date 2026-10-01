@@ -14,7 +14,7 @@ for (const [name, width, height, lang] of [
     viewport: { width, height },
     reducedMotion: "reduce",
   });
-  for (const id of ["forme", "selvedge", "guidecheck", "archiveguard"]) {
+  for (const id of ["perch", "forme", "selvedge", "guidecheck", "archiveguard"]) {
     await page.goto(`http://127.0.0.1:5317/projects/${id}.html?lang=${lang}`);
     await page.evaluate(() => document.fonts.ready);
     await settle(page);

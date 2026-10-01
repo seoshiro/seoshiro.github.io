@@ -34,7 +34,10 @@ test("Every locale has complete project evidence and descriptive copy", () => {
 test("Static home and case pages expose real work and explicit limitations in every locale", () => {
   for (const l of locales) {
     const home = renderPage(l, null);
-    assert.equal((home.match(/class="project-card /g) || []).length, 4);
+    assert.equal(
+      (home.match(/class="project-card /g) || []).length,
+      projects.length,
+    );
     assert.ok(home.includes('id="main"'));
     assert.ok(home.includes('id="work"'));
     for (const p of projects) {
@@ -63,6 +66,9 @@ test("Project descriptions retain the narrow product and human evidence boundari
   assert.match(copy.en.project.archiveguard.limit, /JPEG sample preflight/);
   assert.match(copy.en.project.selvedge.limit, /visual proof/);
   assert.match(copy.en.project.forme.limit, /single-browser/);
+  assert.match(copy.en.project.perch.limit, /rectangular rooms/);
+  assert.match(copy.en.project.perch.limit, /not a construction or safety document/);
+  assert.match(copy.en.project.perch.limit, /No cloud sync/);
   assert.ok(
     !/years of|clients|award-winning|trusted by|revenue/i.test(copy.en.intro),
   );
