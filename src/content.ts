@@ -1,3 +1,4 @@
+import {orbitCopy} from "./orbit.ts";
 import {recentCopy} from "./recent.ts";
 export const locales = ["en", "ru", "kk"] as const;
 export type Locale = (typeof locales)[number];
@@ -5,6 +6,7 @@ export function validLocale(value: string | null): Locale | null {
   return locales.includes(value as Locale) ? (value as Locale) : null;
 }
 export const projects = [
+  {id:"orbit",name:"ORBIT",category:"EDUCATIONAL TOOLS",stack:["TypeScript","Three.js","Orbital mechanics","LocalStorage"],live:"https://seoshiro.github.io/orbit-studio/",source:"https://github.com/seoshiro/orbit-studio",evidence:"https://github.com/seoshiro/orbit-studio/blob/main/docs/VERIFICATION.md",color:"#c1afff",width:1440,height:1000},
   {id:"reson",name:"RESON",category:"01 / PRODUCT DESIGN TOOLS",stack:["TypeScript","Three.js","WebGL","LocalStorage"],live:"https://seoshiro.github.io/reson-studio/",source:"https://github.com/seoshiro/reson-studio",evidence:"https://github.com/seoshiro/reson-studio/blob/main/docs/AUDITS.md",color:"#b68962",width:1440,height:1000},
   {id:"lumen",name:"LUMEN",category:"02 / INTERACTIVE PRODUCT STUDIES",stack:["TypeScript","Three.js","WebGL","Scroll choreography"],live:"https://seoshiro.github.io/lumen-lens/",source:"https://github.com/seoshiro/lumen-lens",evidence:"https://github.com/seoshiro/lumen-lens/blob/main/README.md",color:"#bdb5a3",width:1440,height:1000},
   {
@@ -80,6 +82,7 @@ export const dimensions: Record<
     detail: [number, number];
   }
 > = {
+  orbit: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   reson: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   lumen: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   perch: { main: [1440, 1000], preview: [1440, 1000], detail: [980, 620] },
@@ -171,7 +174,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Explore the work",
     heroFoot: "Independent projects. Open source. Built for the browser.",
     selected: "Selected work",
-    selectedNote: "Seven projects. Different problems. The same attention to detail.",
+    selectedNote: "Eight projects. Different problems. The same attention to detail.",
     caseStudy: "Inside the project",
     live: "Live project",
     source: "Source code",
@@ -211,6 +214,7 @@ export const copy: Record<Locale, Copy> = {
       "Project screenshot unavailable. The case study and live project are still accessible.",
     project: {
       ...recentCopy.en,
+      orbit: orbitCopy.en,
       perch: {
         category: "SPATIAL TOOLS",
         title: "A room.\nA few possibilities.",
@@ -339,7 +343,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Смотреть проекты",
     heroFoot: "Личные проекты. Открытый код. Работа в браузере.",
     selected: "Избранные проекты",
-    selectedNote: "Семь проектов. Разные задачи. Одинаковое внимание к деталям.",
+    selectedNote: "Восемь проектов. Разные задачи. Одинаковое внимание к деталям.",
     caseStudy: "О проекте",
     live: "Открыть проект",
     source: "Исходный код",
@@ -379,6 +383,7 @@ export const copy: Record<Locale, Copy> = {
       "Снимок проекта недоступен. Описание и ссылка на проект остаются доступны.",
     project: {
       ...recentCopy.ru,
+      orbit: orbitCopy.ru,
       perch: {
         category: "ПРОСТРАНСТВЕННЫЕ ИНСТРУМЕНТЫ",
         title: "Одна комната.\nНесколько вариантов.",
@@ -506,7 +511,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Жобаларды көру",
     heroFoot: "Жеке жобалар. Ашық код. Браузерде жұмыс істейді.",
     selected: "Таңдаулы жобалар",
-    selectedNote: "Жеті жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
+    selectedNote: "Сегіз жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
     caseStudy: "Жоба туралы",
     live: "Жобаны ашу",
     source: "Бастапқы код",
@@ -546,6 +551,7 @@ export const copy: Record<Locale, Copy> = {
       "Жоба суреті қолжетімсіз. Сипаттама мен жоба сілтемесі қолжетімді.",
     project: {
       ...recentCopy.kk,
+      orbit: orbitCopy.kk,
       perch: {
         category: "КЕҢІСТІК ҚҰРАЛДАРЫ",
         title: "Бір бөлме.\nБірнеше мүмкіндік.",

@@ -118,5 +118,26 @@
     "height": 620,
     "bytes": 18774,
     "crop": null
+  },
+  {
+    "file": "orbit.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 57128,
+    "crop": null
+  },
+  {
+    "file": "orbit-preview.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 57128,
+    "crop": null
+  },
+  {
+    "file": "orbit-detail.webp",
+    "width": 1440,
+    "height": 1000,
+    "bytes": 42532,
+    "crop": null
   }
 ]

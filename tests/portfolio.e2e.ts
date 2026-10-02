@@ -194,6 +194,7 @@ test("Small-screen case names wrap only at whole project-name boundaries", async
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const titles = {
+    orbit: ["ORBIT."],
     reson: ["RESON."],
     lumen: ["LUMEN."],
     perch: ["PERCH."],
@@ -780,7 +781,7 @@ test("Direct and reloaded localized section links settle on their actual content
       await page.goto(`/?lang=${locale}#${anchor}`);
       await page.evaluate(() => document.fonts.ready);
       const target =
-        anchor === "work" ? ".project-reson .project-visual" : `#${anchor} h2`;
+        anchor === "work" ? ".project-orbit .project-visual" : `#${anchor} h2`;
       await expect(page.locator(target)).toBeInViewport({ timeout: 3000 });
       await page.reload();
       await page.evaluate(() => document.fonts.ready);
@@ -804,7 +805,7 @@ test("Entrance motion keeps hero text and promptly exposed cards at full opacity
     );
   expect(heroOpacity).toEqual(["1", "1", "1"]);
   await page.locator('.header nav a[href="#work"]').click();
-  await expect(page.locator(".project-reson .project-visual")).toBeInViewport({
+  await expect(page.locator(".project-orbit .project-visual")).toBeInViewport({
     timeout: 2000,
   });
   const states = await page.locator(".project-card").evaluateAll((cards) =>

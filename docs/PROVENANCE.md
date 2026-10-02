@@ -34,6 +34,8 @@ No content is added to those crops. Full desktop screenshots remain available on
 
 ## Fonts and original graphics
 
+ORBIT was added on 2 October 2026 from source revision `3da05ace8efabbca99ecaeb494387a4692b0e305`. Its main and construction screenshots were captured from the actual verified production preview at 1440 × 1000. Original PNGs are retained in `docs/originals/orbit.png` and `orbit-detail.png`; the three production WebP files use quality 0.9 without cropping or added content. The spacecraft and schematic Earth are original parametric geometry and illustration. No generated mock screen or external rendering service was used. See [orbit-integration.md](orbit-integration.md).
+
 - Manrope variable TTF copied from FORME's vendored Google Fonts asset. SIL OFL 1.1; license retained at `public/fonts/Manrope-OFL.txt`.
 - IBM Plex Sans Regular and Medium WOFF2 copied from ArchiveGuard's official vendored IBM font package. SIL OFL 1.1; license retained at `public/fonts/IBMPlexSans-LICENSE.txt`. Used explicitly for Russian and Kazakh.
 - Favicon, wordmark treatment, layout, CSS interactions, and parametric ribbon geometry were created for this portfolio. The ribbon is simple mathematical geometry, rendered locally with Canvas2D; no image-generation or paid rendering service was used.
