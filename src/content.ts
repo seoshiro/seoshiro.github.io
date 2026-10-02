@@ -1,9 +1,12 @@
+import {recentCopy} from "./recent.ts";
 export const locales = ["en", "ru", "kk"] as const;
 export type Locale = (typeof locales)[number];
 export function validLocale(value: string | null): Locale | null {
   return locales.includes(value as Locale) ? (value as Locale) : null;
 }
 export const projects = [
+  {id:"reson",name:"RESON",category:"01 / PRODUCT DESIGN TOOLS",stack:["TypeScript","Three.js","WebGL","LocalStorage"],live:"https://seoshiro.github.io/reson-studio/",source:"https://github.com/seoshiro/reson-studio",evidence:"https://github.com/seoshiro/reson-studio/blob/main/docs/AUDITS.md",color:"#b68962",width:1440,height:1000},
+  {id:"lumen",name:"LUMEN",category:"02 / INTERACTIVE PRODUCT STUDIES",stack:["TypeScript","Three.js","WebGL","Scroll choreography"],live:"https://seoshiro.github.io/lumen-lens/",source:"https://github.com/seoshiro/lumen-lens",evidence:"https://github.com/seoshiro/lumen-lens/blob/main/README.md",color:"#bdb5a3",width:1440,height:1000},
   {
     id: "perch",
     name: "PERCH",
@@ -77,6 +80,8 @@ export const dimensions: Record<
     detail: [number, number];
   }
 > = {
+  reson: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
+  lumen: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   perch: { main: [1440, 1000], preview: [1440, 1000], detail: [980, 620] },
   forme: { main: [1366, 820], preview: [1366, 820], detail: [1366, 1518] },
   selvedge: { main: [1440, 1000], preview: [1440, 1000], detail: [850, 822] },
@@ -166,8 +171,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Explore the work",
     heroFoot: "Independent projects. Open source. Built for the browser.",
     selected: "Selected work",
-    selectedNote:
-      "Five projects. Different problems. The same attention to detail.",
+    selectedNote: "Seven projects. Different problems. The same attention to detail.",
     caseStudy: "Inside the project",
     live: "Live project",
     source: "Source code",
@@ -206,6 +210,7 @@ export const copy: Record<Locale, Copy> = {
     imageFailed:
       "Project screenshot unavailable. The case study and live project are still accessible.",
     project: {
+      ...recentCopy.en,
       perch: {
         category: "SPATIAL TOOLS",
         title: "A room.\nA few possibilities.",
@@ -334,8 +339,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Смотреть проекты",
     heroFoot: "Личные проекты. Открытый код. Работа в браузере.",
     selected: "Избранные проекты",
-    selectedNote:
-      "Пять проектов. Разные задачи. Одинаковое внимание к деталям.",
+    selectedNote: "Семь проектов. Разные задачи. Одинаковое внимание к деталям.",
     caseStudy: "О проекте",
     live: "Открыть проект",
     source: "Исходный код",
@@ -374,6 +378,7 @@ export const copy: Record<Locale, Copy> = {
     imageFailed:
       "Снимок проекта недоступен. Описание и ссылка на проект остаются доступны.",
     project: {
+      ...recentCopy.ru,
       perch: {
         category: "ПРОСТРАНСТВЕННЫЕ ИНСТРУМЕНТЫ",
         title: "Одна комната.\nНесколько вариантов.",
@@ -501,7 +506,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Жобаларды көру",
     heroFoot: "Жеке жобалар. Ашық код. Браузерде жұмыс істейді.",
     selected: "Таңдаулы жобалар",
-    selectedNote: "Бес жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
+    selectedNote: "Жеті жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
     caseStudy: "Жоба туралы",
     live: "Жобаны ашу",
     source: "Бастапқы код",
@@ -540,6 +545,7 @@ export const copy: Record<Locale, Copy> = {
     imageFailed:
       "Жоба суреті қолжетімсіз. Сипаттама мен жоба сілтемесі қолжетімді.",
     project: {
+      ...recentCopy.kk,
       perch: {
         category: "КЕҢІСТІК ҚҰРАЛДАРЫ",
         title: "Бір бөлме.\nБірнеше мүмкіндік.",
