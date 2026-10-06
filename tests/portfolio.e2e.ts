@@ -76,6 +76,8 @@ test('Browsers without parallel compilation retain warning-free rendering and in
   await page.goto('/?lang=ru#about');await ready(page);await expect(page.locator('.dialog-close')).toBeFocused();
   await page.locator('.dialog-close').evaluate(b=>(b as HTMLButtonElement).blur());await expect(page.locator('.dialog-close')).toBeFocused();
   await page.keyboard.press('Tab');expect(await page.locator('dialog').evaluate(d=>d.contains(document.activeElement))).toBe(true);
+  await page.evaluate(()=>new Promise<void>(resolve=>{const d=document.querySelector('dialog')!;d.addEventListener('close',()=>resolve(),{once:true});document.querySelector<HTMLButtonElement>('.dialog-close')!.click();document.querySelector<HTMLAnchorElement>('.header nav a[href="#contact"]')!.click();}));
+  await expect(page.locator('dialog')).toHaveAttribute('data-panel','contact');await expect(page.locator('dialog')).toBeVisible();
   expect(warnings).toEqual([]);
 });
 test('Keyboard hotspots, native dialog focus trap, Escape and focus return work',async({page})=>{

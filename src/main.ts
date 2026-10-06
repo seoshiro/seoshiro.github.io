@@ -6,7 +6,7 @@ const id=projectById(document.body.dataset.project||'')?.id||null;
 const query=new URL(window.location.href);
 let stored:string|null=null;try{stored=localStorage.getItem('seoshiro-portfolio-language-v1');}catch{/* Optional preference. */}
 let locale:Locale=validLocale(query.searchParams.get('lang'))||validLocale(stored)||'en';
-let scene:Pavilion|null=null,sequence=0,entered=false,closing=false;
+let scene:Pavilion|null=null,sequence=0,entered=false;
 let returnFocus:HTMLElement|null=null;
 let pending:ReturnType<typeof setTimeout>|null=null;
 type Panel=ProjectId|'work'|'about'|'contact';
@@ -35,7 +35,7 @@ function openPanel(panel:Panel,focusScene=true) {
   renderDialog(panel);
 }
 function openExhibit(exhibit:Exhibit){enter();scene?.focus(exhibit);if(pending)clearTimeout(pending);const current=sequence;const delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:520;pending=setTimeout(()=>{pending=null;if(current===sequence)openPanel(exhibit,false);},delay);}
-function closeDialog(updateHistory=true){const d=document.querySelector<HTMLDialogElement>('.gallery-dialog');if(!d?.open)return;closing=true;d.close();closing=false;document.body.classList.remove('dialog-open');scene?.view('overview');document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String((b as HTMLElement).dataset.view==='overview')));if(updateHistory){if(history.state?.gallery){history.back();}else{const url=new URL(window.location.href);url.hash='';history.replaceState(null,'',url);}}returnFocus?.focus({preventScroll:true});}
+function closeDialog(updateHistory=true){const d=document.querySelector<HTMLDialogElement>('.gallery-dialog');if(!d?.open)return;d.close();document.body.classList.remove('dialog-open');scene?.view('overview');document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String((b as HTMLElement).dataset.view==='overview')));if(updateHistory){if(history.state?.gallery){history.back();}else{const url=new URL(window.location.href);url.hash='';history.replaceState(null,'',url);}}returnFocus?.focus({preventScroll:true});}
 function bindCases(root:ParentNode){root.querySelectorAll<HTMLAnchorElement>('[data-case]').forEach(a=>a.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();openPanel(a.dataset.case as ProjectId,false);}));}
 async function enhance(){
   const current=++sequence;
@@ -51,7 +51,9 @@ async function enhance(){
   // Fragment navigation can reset focus after showModal during initial page load.
   // Restore only escaped focus; movement between controls inside the dialog is retained.
   dialog.addEventListener('focusout',()=>requestAnimationFrame(()=>{if(dialog.open&&!dialog.contains(document.activeElement))dialog.querySelector<HTMLElement>('.dialog-close')?.focus({preventScroll:true});}));
-  dialog.addEventListener('close',()=>{if(!closing)closeDialog();});
+  dialog.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const controls=[...dialog.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.getClientRects().length>0);const first=controls[0],last=controls[controls.length-1];if(first&&((e.shiftKey&&document.activeElement===first)||(!e.shiftKey&&document.activeElement===last))){e.preventDefault();(e.shiftKey?last:first).focus({preventScroll:true});}});
+  // All user closures go through closeDialog. A queued native close event must
+  // never close a different panel opened after the preceding one was dismissed.
   dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const m=e as MouseEvent;if(m.clientX<r.left||m.clientX>r.right||m.clientY<r.top||m.clientY>r.bottom)closeDialog();}});
   bindCases(document);
   document.querySelectorAll<HTMLAnchorElement>('.header nav a,.gallery-toolbar>a').forEach(a=>a.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey)return;e.preventDefault();openPanel(a.hash.slice(1) as Panel,false);}));
@@ -59,7 +61,9 @@ async function enhance(){
   document.querySelectorAll<HTMLAnchorElement>('[data-exhibit]').forEach(a=>a.addEventListener('click',e=>{if(!scene||e.metaKey||e.ctrlKey||e.shiftKey)return;e.preventDefault();openExhibit(a.dataset.exhibit as Exhibit);}));
   document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach(b=>b.addEventListener('click',()=>{enter();scene?.view(b.dataset.view as View);document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));}));
   if(entered)enter();
-  const panel=panelFromHash();if(panel)renderDialog(panel);
+  // Let the browser finish initial fragment navigation before moving focus into a modal.
+  const initialPanel=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{if(current!==sequence)return;const panel=panelFromHash();if(panel&&!dialog.open)renderDialog(panel);}));
+  if(document.readyState==='complete')initialPanel();else window.addEventListener('load',initialPanel,{once:true});
   try{await new Promise<void>(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));const {startPavilion}=await import('./pavilion.ts');if(current!==sequence)return;const nextScene=await startPavilion(openExhibit,entered);if(current!==sequence){nextScene?.dispose();return;}scene=nextScene;}catch{/* Useful static catalogue remains available. */}
   if(!scene){document.querySelector<HTMLElement>('.gallery-status')!.hidden=true;document.querySelector<HTMLElement>('.gallery-hotspots')!.hidden=true;document.querySelector('.pavilion')?.classList.add('gallery-unavailable');}
 }
