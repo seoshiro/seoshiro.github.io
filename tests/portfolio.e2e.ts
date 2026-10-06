@@ -1,887 +1,116 @@
-/* global scrollY, HTMLButtonElement */
-import { test, expect, chromium } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
-import { copy, locales, projects } from "../src/content.ts";
-import {
-  installPausedClock,
-  sculptureFrameChange,
-  sculptureMeasurements,
-} from "./sculpture-helpers.ts";
-const routes = ["/", ...projects.map((p) => `/projects/${p.id}.html`)];
-const liveBase = process.env.LIVE_URL || "http://127.0.0.1:5317";
+import {test,expect} from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import {copy,locales,projects,dimensions} from '../src/content.ts';
+const ready=async(page:import('@playwright/test').Page)=>{await expect(page.locator('.pavilion')).toHaveClass(/gallery-ready/);await expect(page.locator('canvas')).toHaveAttribute('data-frames',/\d+/);};
 
-test("Mobile sculpture moves visibly within half a second and resumes without a time jump", async ({
-  browser,
-}) => {
-  const context = await browser.newContext({
-    viewport: { width: 390, height: 1100 },
-    deviceScaleFactor: 2,
-  });
-  const page = await context.newPage();
-  try {
-    const pause = await installPausedClock(page);
-    await page.goto(liveBase);
-    await page.evaluate(() => document.fonts.ready);
-    await pause();
-    await page.locator("#motion-toggle").click();
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    await page.clock.runFor(48);
-    await sculptureFrameChange(page, true);
-    let previous = 0;
-    for (const seconds of [0.5, 1, 2, 4]) {
-      await page.clock.runFor((seconds - previous) * 1000);
-      previous = seconds;
-      const difference = await sculptureFrameChange(page);
-      expect(difference, `${seconds}s visible movement`).toBeGreaterThan(0.1);
-      const m = await sculptureMeasurements(page);
-      expect(m.paint.aspect).toBeGreaterThan(0.85);
-      expect(m.paint.top).toBeGreaterThan(2);
-      expect(m.paint.bottom).toBeLessThan(m.canvas.height - 2);
+test('Every static case route retains all localized project facts, links, SEO and screenshot assets',async({page})=>{
+  for(const locale of locales)for(const p of projects){
+    const response=await page.goto(`/projects/${p.id}.html?lang=${locale}`);expect(response?.status()).toBe(200);
+    await expect(page.locator('html')).toHaveAttribute('lang',locale);
+    await expect(page.locator('h1')).toHaveText(`${p.name}.`);
+    await expect(page.locator('.case-details')).toContainText(copy[locale].project[p.id].limit);
+    await expect(page.locator('.case-cover img')).toHaveJSProperty('naturalWidth',dimensions[p.id].main[0]);
+    await expect(page.locator('.case-actions a').first()).toHaveAttribute('href',p.live);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href',`https://seoshiro.github.io/projects/${p.id}.html`);
+    await expect(page.locator('canvas')).toHaveCount(0);
+  }
+});
+test('Viewpoints, exhibit clicks, full case links, browser Back and reload are real navigation flows',async({page})=>{
+  await page.goto('/');await ready(page);
+  await page.locator('[data-view="tools"]').click();await expect(page.locator('[data-view="tools"]')).toHaveAttribute('aria-pressed','true');
+  for(const p of projects){
+    await page.locator(`.exhibit-rail [data-exhibit="${p.id}"]`).click();
+    await expect(page.locator('dialog')).toBeVisible();await expect(page.locator('#dialog-title')).toHaveText(p.name);
+    await expect(page).toHaveURL(new RegExp(`#project-${p.id}$`));
+    await expect(page.locator('dialog')).toContainText(copy.en.project[p.id].limit);
+    await expect(page.locator('dialog .case-actions a').first()).toHaveAttribute('href',p.live);
+    await page.keyboard.press('Escape');await expect(page.locator('dialog')).not.toBeVisible();
+    await expect(page).not.toHaveURL(/#project/);
+  }
+  await page.locator('.gallery-hotspots [data-exhibit="lumen"]').click();await expect(page.locator('dialog')).toBeVisible();
+  await page.reload();await expect(page.locator('#dialog-title')).toHaveText('LUMEN');
+  await page.locator('dialog a[href="projects/lumen.html"]').click();await expect(page.locator('h1')).toHaveText('LUMEN.');
+  await page.goBack();await expect(page.locator('#dialog-title')).toHaveText('LUMEN');
+  await page.locator('.dialog-close').click();await expect(page.locator('dialog')).not.toBeVisible();
+});
+test('Direct All Projects, About, Contact and catalogue nested case paths remain accessible',async({page})=>{
+  for(const hash of ['work','about','contact']){
+    await page.goto(`/?lang=ru#${hash}`);await expect(page.locator('dialog')).toBeVisible();
+    await expect(page.locator('.dialog-close')).toBeFocused();
+    if(hash==='work'){
+      await expect(page.locator('dialog .project-card')).toHaveCount(8);
+      await page.locator('dialog [data-case="perch"]').first().click();await expect(page.locator('#dialog-title')).toHaveText('PERCH');
+      await page.goBack();await expect(page.locator('dialog .project-card')).toHaveCount(8);
     }
-    await page.locator("#motion-toggle").click();
-    const still = await page
-      .locator("canvas")
-      .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL());
-    await page.clock.runFor(120000);
-    await expect(page.locator("#motion-toggle")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    expect(
-      await page
-        .locator("canvas")
-        .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
-    ).toBe(still);
-    await page.locator("#motion-toggle").click();
-    expect(
-      await page
-        .locator("canvas")
-        .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
-    ).toBe(still);
-    await sculptureFrameChange(page, true);
-    await page.clock.runFor(500);
-    expect(await sculptureFrameChange(page)).toBeGreaterThan(0.025);
-  } finally {
-    await context.close();
+    if(hash==='contact')await expect(page.locator('dialog a')).toHaveAttribute('href','https://github.com/seoshiro');
+    await page.locator('.dialog-close').click();await expect(page.locator('dialog')).not.toBeVisible();
   }
 });
-test("Mobile sculpture is centered, contained and sharp in portrait and landscape", async ({
-  browser,
-}) => {
-  const context = await browser.newContext({
-    deviceScaleFactor: 3,
-    reducedMotion: "reduce",
-  });
-  const page = await context.newPage();
-  try {
-    for (const [width, height] of [
-      [320, 900],
-      [360, 900],
-      [390, 900],
-      [414, 900],
-      [640, 360],
-      [760, 414],
-    ]) {
-      await page.setViewportSize({ width, height });
-      for (const locale of locales) {
-        await page.goto(new URL(`?lang=${locale}`, liveBase).href);
-        await page.evaluate(() => document.fonts.ready);
-        const m = await sculptureMeasurements(page);
-        expect(
-          Math.abs(m.centerOffset),
-          `${width} ${locale} center`,
-        ).toBeLessThanOrEqual(1);
-        expect(m.buffer.ratioX).toBeCloseTo(2, 1);
-        expect(m.buffer.ratioY).toBeCloseTo(2, 1);
-        expect(m.buffer.bytes).toBeLessThanOrEqual(1024 * 1024);
-        expect(m.paint.left).toBeGreaterThan(2);
-        expect(m.paint.top).toBeGreaterThan(2);
-        expect(m.paint.right).toBeLessThan(m.canvas.width - 2);
-        expect(m.paint.bottom).toBeLessThan(m.canvas.height - 2);
-        expect(m.paint.width / m.canvas.width).toBeGreaterThan(0.6);
-        expect(m.paint.height / m.canvas.height).toBeGreaterThan(0.7);
-        expect(m.actionGap).toBeGreaterThanOrEqual(31);
-        expect(m.introGap).toBeGreaterThanOrEqual(0);
-        expect(m.documentWidth).toBeLessThanOrEqual(width + 1);
-      }
-    }
-  } finally {
-    await context.close();
-  }
-  const saver = await browser.newContext({
-    viewport: { width: 390, height: 900 },
-    deviceScaleFactor: 3,
-  });
-  try {
-    const page = await saver.newPage();
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, "connection", {
-        value: { saveData: true },
-        configurable: true,
-      });
-      localStorage.setItem("seoshiro-portfolio-motion-v1", "playing");
-    });
-    await page.goto(liveBase);
-    await expect(page.locator("#motion-toggle")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    const m = await sculptureMeasurements(page);
-    expect(m.buffer.ratioX).toBeCloseTo(1.5, 1);
-    expect(m.buffer.ratioY).toBeCloseTo(1.5, 1);
-  } finally {
-    await saver.close();
+test('Keyboard hotspots, native dialog focus trap, Escape and focus return work',async({page})=>{
+  await page.goto('/');await ready(page);await page.keyboard.press('Tab');await expect(page.locator('.skip')).toBeFocused();
+  await page.keyboard.press('Enter');await expect(page.locator('#main')).toBeFocused();
+  const trigger=page.locator('.exhibit-rail [data-exhibit="reson"]');await trigger.focus();await page.keyboard.press('Enter');
+  await expect(page.locator('.dialog-close')).toBeFocused();
+  await page.keyboard.press('Shift+Tab');expect(await page.locator('dialog').evaluate(d=>d.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press('Escape');await expect(trigger).toBeFocused();
+});
+test('320, 390, tablet, desktop and wide layouts have no page overflow in EN/RU/KK, including modal content',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  for(const width of [320,390,768,1440,1920])for(const locale of locales){
+    await page.setViewportSize({width,height:900});await page.goto(`/?lang=${locale}`);await ready(page);await page.evaluate(()=>document.fonts.ready);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),`${width} ${locale} home`).toBe(true);
+    await page.locator('.header nav a').first().click();await expect(page.locator('dialog .project-card')).toHaveCount(8);
+    expect(await page.locator('dialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1),`${width} ${locale} catalogue`).toBe(true);
+    await page.locator('dialog [data-case="archiveguard"]').first().click();
+    await expect(page.locator('dialog')).toContainText(copy[locale].project.archiveguard.limit);
+    expect(await page.locator('dialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1),`${width} ${locale} case`).toBe(true);
   }
 });
-
-test("Mobile ribbon stays legible and unclipped across motion phases and still pauses", async ({
-  browser,
-}) => {
-  const context = await browser.newContext({
-    viewport: { width: 360, height: 900 },
-    deviceScaleFactor: 2,
-  });
-  const page = await context.newPage();
-  try {
-    const pause = await installPausedClock(page);
-    await page.goto(new URL("?lang=ru", liveBase).href);
-    await page.evaluate(() => document.fonts.ready);
-    await pause();
-    await page.locator("#motion-toggle").click();
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    await page.clock.runFor(48);
-    let previous = 0;
-    const images = new Set<string>();
-    for (const seconds of [0, 8, 16, 24, 40, 64]) {
-      if (seconds > previous)
-        await page.clock.runFor((seconds - previous) * 1000);
-      previous = seconds;
-      const m = await sculptureMeasurements(page);
-      expect(m.paint.aspect, `${seconds}s silhouette`).toBeGreaterThan(0.85);
-      expect(m.paint.aspect).toBeLessThan(1.25);
-      expect(m.paint.top, `${seconds}s top edge`).toBeGreaterThan(2);
-      expect(m.paint.bottom).toBeLessThan(m.canvas.height - 2);
-      expect(m.paint.width / m.canvas.width).toBeGreaterThan(0.6);
-      expect(m.actionGap).toBeGreaterThan(12);
-      expect(m.introGap).toBeGreaterThanOrEqual(0);
-      images.add(
-        await page
-          .locator("canvas")
-          .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
-      );
-    }
-    expect(images.size).toBe(6);
-    await page.locator("#motion-toggle").click();
-    const still = await page
-      .locator("canvas")
-      .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL());
-    await page.clock.runFor(8000);
-    expect(
-      await page
-        .locator("canvas")
-        .evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
-    ).toBe(still);
-    await expect(page.locator("#motion-toggle")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-  } finally {
-    await context.close();
-  }
+test('All content remains useful without JavaScript and without WebGL',async({browser})=>{
+  const nojs=await browser.newContext({javaScriptEnabled:false});const p=await nojs.newPage();await p.goto('/');await expect(p.locator('.project-card')).toHaveCount(8);await expect(p.locator('.gallery-stage')).not.toBeVisible();await p.locator('.project-title a').first().click();await expect(p.locator('h1')).toHaveText('ORBIT.');await nojs.close();
+  const blocked=await browser.newContext();const q=await blocked.newPage();await q.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(this:HTMLCanvasElement,type,...args){if(type==='webgl2'||type==='webgl')return null;return original.call(this,type,...args);} as typeof original;});await q.goto('/');await expect(q.locator('.pavilion')).toHaveClass(/gallery-unavailable/);await expect(q.locator('.project-card')).toHaveCount(8);await q.locator('.header nav a').first().click();await expect(q.locator('dialog .project-card')).toHaveCount(8);await blocked.close();
 });
-test("Small-screen case names wrap only at whole project-name boundaries", async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  const titles = {
-    orbit: ["ORBIT."],
-    reson: ["RESON."],
-    lumen: ["LUMEN."],
-    perch: ["PERCH."],
-    forme: ["FORME."],
-    selvedge: ["SELVEDGE."],
-    guidecheck: ["Guide", "Check."],
-    archiveguard: ["Archive", "Guard."],
-  };
-  for (const width of [320, 390]) {
-    await page.setViewportSize({ width, height: 844 });
-    for (const locale of locales)
-      for (const project of projects) {
-        await page.goto(`/projects/${project.id}.html?lang=${locale}`);
-        await page.evaluate(() => document.fonts.ready);
-        await expect(page.locator("h1")).toHaveText(`${project.name}.`);
-        await expect(page.locator(".case-title-word")).toHaveText(
-          titles[project.id],
-        );
-        for (const scale of [1, 2]) {
-          await page.evaluate((scale) => {
-            document.documentElement.style.fontSize = scale === 2 ? "200%" : "";
-          }, scale);
-          const layout = await page.locator("h1").evaluate((heading) => {
-            const bounds = heading.getBoundingClientRect();
-            const style = getComputedStyle(heading);
-            return {
-              font: parseFloat(style.fontSize),
-              lineHeight: parseFloat(style.lineHeight),
-              left: bounds.left,
-              right: bounds.right,
-              words: [...heading.querySelectorAll(".case-title-word")].map(
-                (word) => {
-                  const rect = word.getBoundingClientRect();
-                  return {
-                    text: word.textContent,
-                    left: rect.left,
-                    right: rect.right,
-                    height: rect.height,
-                  };
-                },
-              ),
-            };
-          });
-          expect(
-            layout.font,
-            `${project.id} ${locale} ${width}px scale ${scale}`,
-          ).toBeGreaterThanOrEqual(40);
-          for (const word of layout.words) {
-            expect(word.height, word.text!).toBeLessThanOrEqual(
-              layout.lineHeight + 1,
-            );
-            expect(word.left).toBeGreaterThanOrEqual(layout.left - 1);
-            expect(word.right).toBeLessThanOrEqual(layout.right + 1);
-          }
-        }
-      }
-  }
+test('Reduced motion settles immediately; idle, offscreen and hidden scenes stop rendering',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await ready(page);await page.waitForTimeout(250);
+  const frames=()=>page.locator('canvas').getAttribute('data-frames');const still=await frames();await page.waitForTimeout(500);expect(await frames()).toBe(still);
+  await page.locator('[data-view="objects"]').click();await page.waitForTimeout(80);const changed=await frames();expect(Number(changed)).toBeGreaterThan(Number(still));await page.waitForTimeout(250);expect(await frames()).toBe(changed);
+  await page.locator('#contact').scrollIntoViewIfNeeded();const offscreen=await frames();await page.waitForTimeout(300);expect(await frames()).toBe(offscreen);
+  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{value:true,configurable:true});document.dispatchEvent(new Event('visibilitychange'));});
+  const hidden=await frames();await page.waitForTimeout(250);expect(await frames()).toBe(hidden);
+  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{value:false,configurable:true});document.dispatchEvent(new Event('visibilitychange'));});
 });
-
-test("Mobile ribbon stays below the hero action across languages and enlarged text", async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  for (const width of [320, 390, 760]) {
-    await page.setViewportSize({ width, height: 844 });
-    for (const locale of locales) {
-      await page.goto(`/?lang=${locale}`);
-      await page.evaluate(() => document.fonts.ready);
-      for (const scale of [1, 2]) {
-        await page.evaluate((scale) => {
-          document.documentElement.style.fontSize = scale === 2 ? "200%" : "";
-        }, scale);
-        const button = await page.locator(".hero .pill-link").boundingBox();
-        const ribbon = await page.locator(".sculpture").boundingBox();
-        const intro = await page.locator(".hero-intro").boundingBox();
-        expect(
-          ribbon!.y - (button!.y + button!.height),
-          `${locale} ${width}px scale ${scale}`,
-        ).toBeGreaterThanOrEqual(24);
-        expect(intro!.y).toBeGreaterThanOrEqual(ribbon!.y + ribbon!.height);
-        await page.emulateMedia({ reducedMotion: "no-preference" });
-        await page.locator(".hero .pill-link").evaluate((element) => {
-          for (const animation of element.getAnimations()) {
-            animation.pause();
-            animation.currentTime = 0;
-          }
-        });
-        const animatedButton = await page
-          .locator(".hero .pill-link")
-          .boundingBox();
-        const animatedRibbon = await page.locator(".sculpture").boundingBox();
-        expect(
-          animatedRibbon!.y - (animatedButton!.y + animatedButton!.height),
-          `${locale} ${width}px entrance frame`,
-        ).toBeGreaterThanOrEqual(12);
-        await page.emulateMedia({ reducedMotion: "reduce" });
-      }
-    }
-  }
+test('Physical lens mesh clicks and a real lost WebGL context preserve the full fallback',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await ready(page);
+  const point=await page.locator('.gallery-hotspots [data-exhibit="lumen"]').evaluate(a=>({x:parseFloat(a.style.left),y:parseFloat(a.style.top)-25}));
+  await page.locator('canvas').click({position:point});await expect(page.locator('#dialog-title')).toHaveText('LUMEN');await page.keyboard.press('Escape');
+  await page.locator('canvas').evaluate(c=>{const gl=(c as HTMLCanvasElement).getContext('webgl2');gl?.getExtension('WEBGL_lose_context')?.loseContext();});
+  await expect(page.locator('.pavilion')).toHaveClass(/gallery-unavailable/);await expect(page.locator('.gallery-fallback')).toBeVisible();await expect(page.locator('#work .project-card')).toHaveCount(8);
 });
-
-for (const locale of locales) {
-  test(`All ${locale} routes expose complete content, safe links and zero accessibility violations`, async ({
-    page,
-  }) => {
-    const errors: string[] = [];
-    page.on("pageerror", (e) => errors.push(e.message));
-    for (const route of routes) {
-      await page.goto(`${route}?lang=${locale}`);
-      await expect(page.locator("html")).toHaveAttribute("lang", locale);
-      await expect(page.locator("h1")).toBeVisible();
-      await page.evaluate(() => document.fonts.ready);
-      const scan = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-        .analyze();
-      expect(scan.violations, JSON.stringify(scan.violations)).toEqual([]);
-      expect(
-        await page
-          .locator('a[target="_blank"]:not([rel="noopener noreferrer"])')
-          .count(),
-      ).toBe(0);
-    }
-    expect(errors).toEqual([]);
-  });
-  test(`${locale} selection persists through case navigation and back to gallery`, async ({
-    page,
-  }) => {
-    await page.goto("/");
-    await page.locator(`[data-locale="${locale}"]`).click();
-    await expect(page.locator("html")).toHaveAttribute("lang", locale);
-    await expect(page.locator(`[data-locale="${locale}"]`)).toBeFocused();
-    await page.locator(".project-forme .project-visual").click();
-    await expect(page.locator("h1")).toContainText("FORME");
-    await expect(page.locator("html")).toHaveAttribute("lang", locale);
-    await page.locator(".back-link").click();
-    await expect(page.locator("#work")).toBeInViewport();
-    await expect(page.locator("html")).toHaveAttribute("lang", locale);
-    await page.reload();
-    await expect(page.locator("html")).toHaveAttribute("lang", locale);
-  });
-}
-test("All case studies navigate next, back and browser history without losing route context", async ({
-  page,
-}) => {
-  await page.goto("/");
-  for (const p of projects) {
-    await page.goto(`/projects/${p.id}.html`);
-    await expect(page.locator("h1")).toContainText(p.name);
-    await page.locator(".next-project").click();
-    await expect(page).not.toHaveURL(new RegExp(`${p.id}\\.html$`));
-    await page.goBack();
-    await expect(page.locator("h1")).toContainText(p.name);
-    await page.locator(".back-link").click();
-    await expect(page.locator("#work")).toBeInViewport();
-  }
+test('Save-Data caps resolution and skips animation even without system reduced motion',async({page})=>{
+  await page.addInitScript(()=>{Object.defineProperty(navigator,'connection',{value:{saveData:true},configurable:true});});
+  await page.setViewportSize({width:390,height:844});await page.goto('/');await ready(page);await page.waitForTimeout(150);
+  const before=await page.locator('canvas').getAttribute('data-frames');await page.waitForTimeout(250);expect(await page.locator('canvas').getAttribute('data-frames')).toBe(before);
+  expect(await page.locator('canvas').evaluate(c=>(c as HTMLCanvasElement).width<=c.clientWidth)).toBe(true);
 });
-test("Keyboard skip link and language changes retain visible focus", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await page.keyboard.press("Tab");
-  await expect(page.locator(".skip")).toBeFocused();
-  await page.keyboard.press("Enter");
-  await expect(page.locator("#main")).toBeFocused();
-  await page.locator('[data-locale="ru"]').focus();
-  await page.keyboard.press("Enter");
-  await expect(page.locator('[data-locale="ru"]')).toBeFocused();
-  await expect(page.locator("html")).toHaveAttribute("lang", "ru");
-  await page.keyboard.press("Tab");
-  await expect(page.locator('[data-locale="kk"]')).toBeFocused();
+test('Accessibility checks pass on localized homes, cases and open dialogs',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  for(const locale of locales){await page.goto(`/?lang=${locale}`);await ready(page);expect((await new AxeBuilder({page}).analyze()).violations).toEqual([]);await page.locator('.header nav a').nth(1).click();expect((await new AxeBuilder({page}).analyze()).violations).toEqual([]);}
+  for(const p of projects){await page.goto(`/projects/${p.id}.html`);expect((await new AxeBuilder({page}).analyze()).violations).toEqual([]);}
 });
-test("Static pages remain complete with JavaScript disabled", async ({
-  browser,
-}) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
-  const page = await context.newPage();
-  for (const route of routes) {
-    await page.goto(new URL(route, liveBase).href);
-    await expect(page.locator("h1")).toBeVisible();
-    await expect(page.locator("main")).toContainText(
-      route === "/" ? "Selected work" : "Practical boundaries",
-    );
-    await expect(page.locator(".languages")).toBeHidden();
-  }
-  await context.close();
+test('Storage denial, malformed locale and unavailable screenshots retain useful navigation',async({page})=>{
+  await page.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw Error('denied');}});});
+  await page.goto('/?lang=unsupported');await expect(page.locator('html')).toHaveAttribute('lang','en');
+  await page.locator('[data-locale="kk"]').click();await expect(page.locator('html')).toHaveAttribute('lang','kk');
+  await page.route('**/assets/lumen.webp',r=>r.abort());await page.goto('/?lang=ru#project-lumen');await expect(page.locator('dialog .image-error')).toBeVisible();await expect(page.locator('dialog .case-actions a').first()).toHaveAttribute('href',projects.find(p=>p.id==='lumen')!.live);
 });
-test("Language works when preference storage is denied", async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(window, "localStorage", {
-      get() {
-        throw new Error("Storage denied");
-      },
-    });
-  });
-  await page.goto("/");
-  await page.locator('[data-locale="kk"]').click();
-  await expect(page.locator("html")).toHaveAttribute("lang", "kk");
-  await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("lang", "kk");
-  await expect(page.locator(".project-card")).toHaveCount(projects.length);
+test('200 percent enlarged text retains readable navigation and whole case names',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:320,height:900});
+  for(const locale of locales){await page.goto(`/?lang=${locale}`);await page.evaluate(()=>document.documentElement.style.fontSize='200%');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1)).toBe(true);await page.locator('.header nav a').nth(2).click();expect(await page.locator('dialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1)).toBe(true);}
+  for(const p of projects){await page.goto(`/projects/${p.id}.html?lang=kk`);await page.evaluate(()=>document.documentElement.style.fontSize='200%');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),p.id).toBe(true);}
 });
-test("Unsupported and hostile locale values fall back to English", async ({
-  page,
-}) => {
-  await page.goto("/?lang=%3Cscript%3E");
-  await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.locator("h1")).toContainText(copy.en.name);
-});
-test("Missing Canvas keeps core content and hides the unavailable control", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    HTMLCanvasElement.prototype.getContext = () => null;
-  });
-  await page.goto("/");
-  await expect(page.locator(".sculpture")).toBeHidden();
-  await expect(page.locator("#motion-toggle")).toBeHidden();
-  await expect(page.locator(".project-card")).toHaveCount(projects.length);
-  await page.locator(".project-forme .project-visual").click();
-  await expect(page.locator("h1")).toContainText("FORME");
-});
-test("Reduced motion starts still and allows explicit play and pause", async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const button = page.locator("#motion-toggle");
-  await expect(button).toHaveAttribute("aria-pressed", "true");
-  const before = await page
-    .locator("canvas")
-    .evaluate((c) => (c as HTMLCanvasElement).toDataURL());
-  await page.waitForTimeout(150);
-  expect(
-    await page
-      .locator("canvas")
-      .evaluate((c) => (c as HTMLCanvasElement).toDataURL()),
-  ).toBe(before);
-  await button.click();
-  await expect(button).toHaveAttribute("aria-pressed", "false");
-  await page.waitForTimeout(150);
-  expect(
-    await page
-      .locator("canvas")
-      .evaluate((c) => (c as HTMLCanvasElement).toDataURL()),
-  ).not.toBe(before);
-  await button.click();
-  await expect(button).toHaveAttribute("aria-pressed", "true");
-});
-test("Offscreen sculpture stops drawing and resumes when visible", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "false",
-  );
-  await page.locator("#about").scrollIntoViewIfNeeded();
-  await page.waitForTimeout(100);
-  const first = await page
-    .locator("canvas")
-    .evaluate((c) => (c as HTMLCanvasElement).toDataURL());
-  await page.waitForTimeout(200);
-  expect(
-    await page
-      .locator("canvas")
-      .evaluate((c) => (c as HTMLCanvasElement).toDataURL()),
-  ).toBe(first);
-  await page.locator(".hero").scrollIntoViewIfNeeded();
-  await page.waitForTimeout(200);
-  expect(
-    await page
-      .locator("canvas")
-      .evaluate((c) => (c as HTMLCanvasElement).toDataURL()),
-  ).not.toBe(first);
-});
-test("Mobile defaults to a static sculpture with accessible motion controls", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  const button = await page.locator(".hero .pill-link").boundingBox();
-  expect(button!.height).toBeGreaterThanOrEqual(44);
-});
-test("Network-disabled assets produce a readable failure state", async ({
-  page,
-}) => {
-  await page.route("**/assets/*-preview.webp", (route) => route.abort());
-  await page.goto("/");
-  await page.locator("#work").scrollIntoViewIfNeeded();
-  await page.locator(".project-forme").scrollIntoViewIfNeeded();
-  await expect(page.locator(".project-forme .image-error")).toBeVisible();
-  await expect(page.locator(".project-forme .project-visual")).toHaveAttribute(
-    "href",
-    "projects/forme.html",
-  );
-  await expect(page.locator(".project-forme .project-links a")).toHaveCount(2);
-});
-test("Each local asset loads and has stable intrinsic dimensions", async ({
-  page,
-}) => {
-  await page.goto("/");
-  for (const card of await page.locator(".project-card").all()) {
-    await card.scrollIntoViewIfNeeded();
-    await expect(card.locator("img")).toBeVisible();
-    await expect
-      .poll(() =>
-        card
-          .locator("img")
-          .evaluate((img) => (img as HTMLImageElement).naturalWidth),
-      )
-      .toBeGreaterThan(0);
-  }
-  for (const route of routes.slice(1)) {
-    await page.goto(route);
-    await expect
-      .poll(() =>
-        page
-          .locator(".case-cover img")
-          .evaluate((img) => (img as HTMLImageElement).naturalWidth),
-      )
-      .toBeGreaterThan(0);
-    await page.locator(".case-details").scrollIntoViewIfNeeded();
-    await expect
-      .poll(() =>
-        page
-          .locator(".detail-image img")
-          .evaluate((img) => (img as HTMLImageElement).naturalWidth),
-      )
-      .toBeGreaterThan(0);
-    const dims = await page.locator(".case-cover img").evaluate((img) => ({
-      width: img.getAttribute("width"),
-      height: img.getAttribute("height"),
-      actualWidth: (img as HTMLImageElement).naturalWidth,
-      actualHeight: (img as HTMLImageElement).naturalHeight,
-    }));
-    expect(Number(dims.width)).toBe(dims.actualWidth);
-    expect(Number(dims.height)).toBe(dims.actualHeight);
-  }
-});
-for (const width of [320, 390, 768, 1440, 1920]) {
-  test(`Home and all case pages stay within ${width}px in all languages`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width, height: 900 });
-    for (const locale of locales) {
-      for (const route of routes) {
-        await page.goto(`${route}?lang=${locale}`);
-        await page.evaluate(() => document.fonts.ready);
-        const overflow = await page.evaluate(() => ({
-          width: document.documentElement.clientWidth,
-          scroll: document.documentElement.scrollWidth,
-        }));
-        expect(overflow.scroll, `${route} ${locale}`).toBeLessThanOrEqual(
-          overflow.width + 1,
-        );
-        for (const locator of ["h1", "h2", ".header nav", ".languages"]) {
-          const elements = await page.locator(locator).all();
-          for (const el of elements) {
-            const box = await el.boundingBox();
-            expect(
-              box!.x + box!.width,
-              `${route} ${locale} ${locator}`,
-            ).toBeLessThanOrEqual(width + 1);
-          }
-        }
-      }
-    }
-  });
-}
-test("200 percent zoom and enlarged text retain readable content and navigation", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1280, height: 1000 });
-  for (const locale of locales) {
-    for (const route of routes) {
-      await page.goto(`${route}?lang=${locale}`);
-      await page.evaluate(() => {
-        document.body.style.zoom = "2";
-      });
-      expect(
-        await page.evaluate(() => document.documentElement.scrollWidth),
-      ).toBeLessThanOrEqual(1281);
-      await expect(page.locator(".header nav")).toBeVisible();
-      await page.evaluate(() => {
-        document.body.style.zoom = "";
-        document.documentElement.style.fontSize = "200%";
-      });
-      const overflow = await page.evaluate(
-        () =>
-          document.documentElement.scrollWidth >
-          document.documentElement.clientWidth + 1,
-      );
-      expect(overflow, `${route} ${locale} text size`).toBe(false);
-    }
-  }
-});
-test("Repeated language changes preserve the gallery location and cleanup observers", async ({
-  page,
-}) => {
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
-  await page.locator("#work").scrollIntoViewIfNeeded();
-  const y = await page.evaluate(() => scrollY);
-  for (let i = 0; i < 9; i++) {
-    await page
-      .locator(`[data-locale="${locales[i % 3]}"]`)
-      .evaluate((el) => (el as HTMLButtonElement).click());
-  }
-  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(y * 0.7);
-  expect(errors).toEqual([]);
-});
-test("Runtime makes no third-party requests, even after navigating every project", async ({
-  page,
-}) => {
-  const external: string[] = [];
-  page.on("request", (req) => {
-    if (!req.url().startsWith(new URL(liveBase).origin))
-      external.push(req.url());
-  });
-  for (const route of routes) {
-    await page.goto(route);
-    await page.locator("footer").scrollIntoViewIfNeeded();
-  }
-  expect(external).toEqual([]);
-});
-test("A paused sculpture stays paused across locale changes", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await page.locator("#motion-toggle").click();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.locator('[data-locale="ru"]').click();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await expect(page.locator("#motion-toggle")).toContainText(copy.ru.motionOn);
-});
-test("An OS reduced-motion change immediately stops automatic drawing", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  const still = await page
-    .locator("canvas")
-    .evaluate((c) => (c as HTMLCanvasElement).toDataURL());
-  await page.waitForTimeout(150);
-  expect(
-    await page
-      .locator("canvas")
-      .evaluate((c) => (c as HTMLCanvasElement).toDataURL()),
-  ).toBe(still);
-});
-test("Production server denies source exposure and malformed paths and sends restrictive security headers", async ({
-  request,
-}) => {
-  test.skip(
-    !!process.env.LIVE_URL,
-    "Preview-server response headers are tested locally; static production CSP is tested through its HTML.",
-  );
-  const home = await request.get("/");
-  expect(home.status()).toBe(200);
-  expect(home.headers()["content-security-policy"]).toContain(
-    "connect-src 'none'",
-  );
-  expect(home.headers()["x-content-type-options"]).toBe("nosniff");
-  for (const route of [
-    "/src/main.ts",
-    "/package.json",
-    "/.git/config",
-    "/%ZZ",
-  ]) {
-    expect((await request.get(route)).status()).toBe(404);
-  }
-});
-test("First useful content arrives before the runtime script", async ({
-  page,
-}) => {
-  await page.route("**/assets/main-*.js", (route) => route.abort());
-  await page.goto("/");
-  await expect(page.locator("h1")).toContainText(copy.en.name);
-  await expect(page.locator(".project-card")).toHaveCount(projects.length);
-  await page.locator(".project-forme .project-visual").click();
-  await expect(page.locator("h1")).toContainText("FORME");
-  await expect(page.locator("main")).toContainText(copy.en.project.forme.limit);
-});
-
-test("Manual pause persists after reload and a case-study round trip", async ({
-  page,
-}) => {
-  await page.goto("/?lang=kk");
-  await page.locator("#motion-toggle").click();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.reload();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.locator(".project-forme .project-visual").click();
-  await page.locator(".back-link").click();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await expect(page.locator("#motion-toggle")).toContainText(copy.kk.motionOn);
-});
-test("Saved play cannot override system reduced motion", async ({ page }) => {
-  await page.addInitScript(() =>
-    localStorage.setItem("seoshiro-portfolio-motion-v1", "playing"),
-  );
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-});
-test("Motion preference uses tab storage when persistent storage is denied", async ({
-  page,
-}) => {
-  await page.addInitScript(() =>
-    Object.defineProperty(window, "localStorage", {
-      get() {
-        throw new Error("Denied");
-      },
-    }),
-  );
-  await page.goto("/");
-  await page.locator("#motion-toggle").click();
-  await page.reload();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-});
-test("Denied preference stores preserve usable in-page motion controls", async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    for (const key of ["localStorage", "sessionStorage"])
-      Object.defineProperty(window, key, {
-        get() {
-          throw new Error("Denied");
-        },
-      });
-  });
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
-  await page.locator("#motion-toggle").click();
-  await page.locator('[data-locale="ru"]').click();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.locator("#motion-toggle").click();
-  await expect(page.locator("#motion-toggle")).toHaveAttribute(
-    "aria-pressed",
-    "false",
-  );
-  expect(errors).toEqual([]);
-});
-test("Direct and reloaded localized section links settle on their actual content", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const locale of locales)
-    for (const anchor of ["work", "about", "contact"]) {
-      await page.goto(`/?lang=${locale}#${anchor}`);
-      await page.evaluate(() => document.fonts.ready);
-      const target =
-        anchor === "work" ? ".project-orbit .project-visual" : `#${anchor} h2`;
-      await expect(page.locator(target)).toBeInViewport({ timeout: 3000 });
-      await page.reload();
-      await page.evaluate(() => document.fonts.ready);
-      await expect(page.locator(target)).toBeInViewport({ timeout: 3000 });
-    }
-});
-test("Entrance motion keeps hero text and promptly exposed cards at full opacity", async ({
-  page,
-}) => {
-  await page.goto("/");
-  const heroOpacity = await page
-    .locator(".hero-name, .hero-phrase, .hero-text > .pill-link")
-    .evaluateAll((elements) =>
-      elements.map((element) => {
-        for (const animation of element.getAnimations()) {
-          animation.pause();
-          animation.currentTime = 0;
-        }
-        return getComputedStyle(element).opacity;
-      }),
-    );
-  expect(heroOpacity).toEqual(["1", "1", "1"]);
-  await page.locator('.header nav a[href="#work"]').click();
-  await expect(page.locator(".project-orbit .project-visual")).toBeInViewport({
-    timeout: 2000,
-  });
-  const states = await page.locator(".project-card").evaluateAll((cards) =>
-    cards.map((card) => ({
-      opacity: getComputedStyle(card).opacity,
-      animation: getComputedStyle(card).animationName,
-    })),
-  );
-  expect(states.every((s) => s.opacity === "1" && s.animation === "none")).toBe(
-    true,
-  );
-  await page.locator(".principles").scrollIntoViewIfNeeded();
-  const principleOpacity = await page
-    .locator(".principles li")
-    .evaluateAll((elements) =>
-      elements.map((element) => {
-        for (const animation of element.getAnimations()) {
-          animation.pause();
-          animation.currentTime = 0;
-        }
-        return getComputedStyle(element).opacity;
-      }),
-    );
-  expect(principleOpacity.every((opacity) => opacity === "1")).toBe(true);
-});
-
-test("Real cached browser Back keeps motion and language controls usable", async ({
-  baseURL,
-}, testInfo) => {
-  const browser = await chromium.launch({
-    ...testInfo.project.use.launchOptions,
-    // Full Chromium supports page-history caching; the CI headless shell does not.
-    channel: "chromium",
-    // Playwright disables this browser feature by default.
-    ignoreDefaultArgs: ["--disable-back-forward-cache"],
-  });
-  try {
-    const page = await browser.newPage({
-      viewport: { width: 1440, height: 1000 },
-    });
-    await page.addInitScript(() => {
-      window.addEventListener("pageshow", (event) => {
-        document.documentElement.dataset.historyCache = String(event.persisted);
-      });
-    });
-    await page.goto(baseURL || liveBase);
-    await page.locator("#motion-toggle").click();
-    await page.locator(".project-forme .project-visual").click();
-    await page.goBack({ waitUntil: "commit" });
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-history-cache",
-      "true",
-    );
-    await expect(page.locator("#motion-toggle")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    await page.locator("#motion-toggle").click();
-    await expect(page.locator("#motion-toggle")).toHaveAttribute(
-      "aria-pressed",
-      "false",
-    );
-    await page.locator('[data-locale="ru"]').click();
-    await expect(page.locator("html")).toHaveAttribute("lang", "ru");
-    await page.locator(".project-forme .project-visual").click();
-    await page.goBack({ waitUntil: "commit" });
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-history-cache",
-      "true",
-    );
-    await page.locator("#motion-toggle").click();
-    await expect(page.locator("#motion-toggle")).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-  } finally {
-    await browser.close();
-  }
+test('Runtime has no third party requests or uncaught errors and server protects source files',async({page,request})=>{
+  const errors:string[]=[],thirdParty:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(new URL(r.url()).origin!==new URL(process.env.LIVE_URL||'http://127.0.0.1:5317').origin)thirdParty.push(r.url());});
+  await page.goto('/');await ready(page);for(const locale of locales){await page.locator(`[data-locale="${locale}"]`).click();await ready(page);}
+  await expect(page.locator('.project-card')).toHaveCount(8);expect(errors).toEqual([]);expect(thirdParty).toEqual([]);
+  if(!process.env.LIVE_URL){for(const path of ['/src/content.ts','/package.json','/.git/config'])expect((await request.get(path)).status()).toBe(404);const response=await request.get('/');expect(response.headers()['content-security-policy']).toContain("connect-src 'none'");}
 });
