@@ -27,6 +27,7 @@ The loopback production preview uses http://127.0.0.1:5317. Browser tests use in
 - `src/render.ts`, `main.ts`, `style.css`: static routes, optional enhancement and responsive presentation.
 - `scripts/capture-gallery.mjs`: responsive screenshots and evidence index.
 - `scripts/gallery-performance.mjs`: reproducible local throttled measurements.
+- `scripts/bake-environment.mjs`: optional offline studio-light bake (installed Chrome), stored locally with its Three.js MIT license.
 - `scripts/verify-links.mjs`: existing demo/source HTTP reachability.
 - `docs/GALLERY.md`: provenance, rollout, performance boundaries and verification.
 

@@ -3,6 +3,27 @@ import AxeBuilder from '@axe-core/playwright';
 import {copy,locales,projects,dimensions} from '../src/content.ts';
 const ready=async(page:import('@playwright/test').Page)=>{await expect(page.locator('.pavilion')).toHaveClass(/gallery-ready/);await expect(page.locator('canvas')).toHaveAttribute('data-frames',/\d+/);};
 
+test('Phone exhibits fit completely, labels never intersect, and resizing preserves the active viewpoint',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  const fit=async()=>{
+    const bounds=await page.locator('canvas').evaluate(c=>JSON.parse(c.dataset.objectBounds||'[]') as {id:string;left:number;right:number;top:number;bottom:number}[]);
+    expect(bounds).toHaveLength(4);for(const b of bounds){expect(b.left,b.id).toBeGreaterThan(.03);expect(b.right,b.id).toBeLessThan(.97);expect(b.top,b.id).toBeGreaterThan(.03);expect(b.bottom,b.id).toBeLessThan(.97);}
+  };
+  for(const width of [320,390,768]){
+    await page.setViewportSize({width,height:1000});await page.goto('/');await ready(page);await page.evaluate(()=>document.fonts.ready);
+    const separated=await page.evaluate(()=>document.querySelector('.pavilion-heading')!.getBoundingClientRect().bottom<=document.querySelector('.gallery-stage')!.getBoundingClientRect().top+1);expect(separated).toBe(true);
+    for(const view of ['overview','objects','tools']){
+      await page.locator(`[data-view="${view}"]`).click();await page.waitForTimeout(100);
+      if(width<700&&view!=='tools')await fit();
+      const labels=await page.locator('.gallery-hotspots .hotspot:visible').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {id:(n as HTMLElement).dataset.exhibit,left:r.left,right:r.right,top:r.top,bottom:r.bottom};}));
+      expect(labels).toHaveLength(view==='tools'?4:5);
+      for(let i=0;i<labels.length;i++)for(let j=i+1;j<labels.length;j++){const a=labels[i],b=labels[j];expect(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom,`${width} ${view} ${a.id}/${b.id}`).toBe(true);}
+    }
+  }
+  await page.locator('[data-view="overview"]').click();await page.setViewportSize({width:320,height:1000});await page.waitForTimeout(200);await fit();
+  await expect(page.locator('.gallery-hotspots .hotspot:visible')).toHaveCount(5);
+});
+
 test('Every static case route retains all localized project facts, links, SEO and screenshot assets',async({page})=>{
   for(const locale of locales)for(const p of projects){
     const response=await page.goto(`/projects/${p.id}.html?lang=${locale}`);expect(response?.status()).toBe(200);
@@ -109,8 +130,8 @@ test('200 percent enlarged text retains readable navigation and whole case names
   for(const p of projects){await page.goto(`/projects/${p.id}.html?lang=kk`);await page.evaluate(()=>document.documentElement.style.fontSize='200%');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),p.id).toBe(true);}
 });
 test('Runtime has no third party requests or uncaught errors and server protects source files',async({page,request})=>{
-  const errors:string[]=[],thirdParty:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(new URL(r.url()).origin!==new URL(process.env.LIVE_URL||'http://127.0.0.1:5317').origin)thirdParty.push(r.url());});
+  const errors:string[]=[],thirdParty:string[]=[],warnings:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='warning')warnings.push(m.text());});page.on('request',r=>{if(new URL(r.url()).origin!==new URL(process.env.LIVE_URL||'http://127.0.0.1:5317').origin)thirdParty.push(r.url());});
   await page.goto('/');await ready(page);for(const locale of locales){await page.locator(`[data-locale="${locale}"]`).click();await ready(page);}
-  await expect(page.locator('.project-card')).toHaveCount(8);expect(errors).toEqual([]);expect(thirdParty).toEqual([]);
+  await expect(page.locator('.project-card')).toHaveCount(8);expect(errors).toEqual([]);expect(thirdParty).toEqual([]);expect(warnings).toEqual([]);
   if(!process.env.LIVE_URL){for(const path of ['/src/content.ts','/package.json','/.git/config'])expect((await request.get(path)).status()).toBe(404);const response=await request.get('/');expect(response.headers()['content-security-policy']).toContain("connect-src 'none'");}
 });

@@ -1,8 +1,8 @@
 import * as T from 'three';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {environmentInfo} from './environment-info.ts';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
-import type {ProjectId} from './content.ts';
+import {projects,type ProjectId} from './content.ts';
 
 export type Exhibit = ProjectId|'about';
 export type View = 'overview'|'objects'|'tools';
@@ -11,7 +11,7 @@ const locations: Record<Exhibit,[number,number,number]> = {
   lumen:[-3.2,1.72,1.55],reson:[0,2,-0.6],perch:[3.25,1.5,1.2],orbit:[-4.5,2,-2.9],
   forme:[1.25,2.8,-3.84],selvedge:[3.25,2.8,-3.84],guidecheck:[1.25,1.15,-3.84],archiveguard:[3.25,1.15,-3.84],about:[-1.5,1.05,3.6],
 };
-export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pavilion|null {
+export async function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Promise<Pavilion|null> {
   const canvas=document.querySelector<HTMLCanvasElement>('#gallery-canvas'),stage=canvas?.parentElement;
   if(!canvas||!stage) return null;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -22,15 +22,22 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   renderer.toneMapping=T.ACESFilmicToneMapping;
   renderer.toneMappingExposure=0.82;
   renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=T.PCFSoftShadowMap;
+  renderer.shadowMap.type=T.PCFShadowMap;
   const scene=new T.Scene();
   scene.background=new T.Color('#eae8df');
   scene.fog=new T.Fog('#eae8df',22,50);
   const camera=new T.PerspectiveCamera(43,1,0.1,65);
-  const pmrem=new T.PMREMGenerator(renderer),room=new RoomEnvironment();
-  const environment=pmrem.fromScene(room,0.06);
-  scene.environment=environment.texture;scene.environmentIntensity=0.38;
-  room.dispose();pmrem.dispose();
+  const yieldMain=()=>new Promise<void>(resolve=>setTimeout(resolve,0));
+  await yieldMain();
+  // Decode the baked half-float studio illumination. No runtime PMREM render passes.
+  const illumination=new Image();illumination.src='assets/pavilion-environment.png';
+  await illumination.decode();const packed=document.createElement('canvas');packed.width=illumination.width;packed.height=illumination.height;
+  const ctx=packed.getContext('2d',{willReadFrequently:true})!;ctx.drawImage(illumination,0,0);
+  const rgba=ctx.getImageData(0,0,packed.width,packed.height).data,bytes=new Uint8Array(environmentInfo.length);
+  for(let i=0;i<bytes.length;i++)bytes[i]=rgba[Math.floor(i/3)*4+i%3];
+  const environment=new T.DataTexture(new Uint16Array(bytes.buffer),environmentInfo.width,environmentInfo.height,T.RGBAFormat,T.HalfFloatType);
+  environment.mapping=T.CubeUVReflectionMapping;environment.minFilter=T.LinearFilter;environment.magFilter=T.LinearFilter;environment.generateMipmaps=false;environment.needsUpdate=true;
+  scene.environment=environment;scene.environmentIntensity=0.38;await yieldMain();
   const textures:T.Texture[]=[];
   const geometry=new Set<T.BufferGeometry>(),materials=new Set<T.Material>();
   let seed=91;
@@ -54,7 +61,7 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   }
   const stoneMap=texture('stone'),woodMap=texture('wood'),fabricMap=texture('fabric');
   const materialCache=new Map<string,T.MeshStandardMaterial>();
-  function mat(color:string,roughness=0.7,metalness=0,map?:T.Texture){const key=`${color}|${roughness}|${metalness}|${map?.uuid}`;const cached=materialCache.get(key);if(cached)return cached;const m=new T.MeshStandardMaterial({color,roughness,metalness,map});materials.add(m);materialCache.set(key,m);return m;}
+  function mat(color:string,roughness=0.7,metalness=0,map?:T.Texture){const key=`${color}|${roughness}|${metalness}|${map?.uuid}`;const cached=materialCache.get(key);if(cached)return cached;const m=new T.MeshStandardMaterial({color,roughness,metalness,...(map?{map}:{})});materials.add(m);materialCache.set(key,m);return m;}
   const plaster=mat('#ede9de'),stone=mat('#f0e9d9',0.86,0,stoneMap),wood=mat('#c5a77e',0.55,0,woodMap),dark=mat('#292b26',0.37,0.3),metal=mat('#a8a294',0.3,0.8),fabric=mat('#b8b298',0.85,0,fabricMap),ivory=mat('#e8e5d9',0.8),green=mat('#596447',0.8);
   function mesh(g:T.BufferGeometry,m:T.Material,parent:T.Object3D=scene){geometry.add(g);const x=new T.Mesh(g,m);x.castShadow=true;x.receiveShadow=true;parent.add(x);return x;}
   function box(w:number,h:number,d:number,m:T.Material,pos:[number,number,number],parent:T.Object3D=scene,round=0){const g=round?new RoundedBoxGeometry(w,h,d,2,round):new T.BoxGeometry(w,h,d);const x=mesh(g,m,parent);x.position.set(...pos);return x;}
@@ -71,16 +78,17 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   const shadowMat=new T.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false});materials.add(shadowMat);
   function contactShadow(parent:T.Object3D,w:number,d:number,y:number){const x=mesh(new T.PlaneGeometry(w,d),shadowMat,parent);x.rotation.x=-Math.PI/2;x.position.y=y;x.castShadow=false;x.receiveShadow=false;}
   function label(text:string,w:number,h:number,parent:T.Object3D,pos:[number,number,number],rotate=0,bg='#ece8dc',ink='#34382e') {
-    const cv=document.createElement('canvas');cv.width=512;cv.height=128;
-    const ctx=cv.getContext('2d')!;ctx.fillStyle=bg;ctx.fillRect(0,0,512,128);ctx.fillStyle=ink;ctx.font='500 49px Arial';ctx.textAlign='center';ctx.fillText(text,256,82);
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=256;
+    const ctx=cv.getContext('2d')!;ctx.fillStyle=bg;ctx.fillRect(0,0,1024,256);ctx.fillStyle=ink;ctx.font='500 98px Arial';const size=Math.min(98,Math.floor(980/ctx.measureText(text).width*98));ctx.font=`500 ${size}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,512,136);
     const t=new T.CanvasTexture(cv);t.colorSpace=T.SRGBColorSpace;textures.push(t);
     const m=new T.MeshBasicMaterial({map:t});materials.add(m);
     const x=mesh(new T.PlaneGeometry(w,h),m,parent);x.castShadow=false;x.position.set(...pos);x.rotation.x=rotate;return x;
   }
+  const plaqueText=(id:ProjectId)=>`${String(projects.findIndex(p=>p.id===id)+1).padStart(2,'0')}  /  ${projects.find(p=>p.id===id)!.name}`;
   // A pavilion open toward the visitor, with a deep window bay and a timber ceiling rhythm.
-  box(17,0.22,16,stone,[0,-0.13,2.8]);
+  box(17,0.22,30,stone,[0,-0.13,9.8]);
   box(17,5.4,0.25,plaster,[0,2.6,-4.5]);
-  box(0.28,5.4,10,plaster,[7.1,2.6,0.3]);
+  box(0.28,5.4,2.5,plaster,[7.1,2.6,-3.25]);
   box(0.22,0.6,11,stone,[-7.1,0.2,0.5]);
   box(0.22,0.5,11,plaster,[-7.1,4.85,0.5]);
   for(const z of [-4.4,-1.7,1,3.7,6.4])box(0.2,4.3,0.13,wood,[-7.1,2.55,z]);
@@ -88,15 +96,20 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   // Bright exterior reveals the real window opening; no opaque wall behind the glass.
   box(0.15,5,20,mat('#e4e9dd'),[-11,2,-2]);
   box(7,0.1,20,mat('#c3cbb7'),[-10,-0.3,-2]);
-  for(let i=0;i<12;i++)box(0.1,0.22,10,wood,[-6+i*1.12,5.05,0]);
+  // Continuous ceiling and lintels connect the timber ribs to their supports.
+  box(14.4,0.12,12.5,plaster,[0,5.24,1.55]);
+  for(const x of [-7.1,7.1])box(0.24,0.25,12.5,wood,[x,4.98,1.55]);
+  for(const z of [-4.55,7.8])box(14.4,0.25,0.22,wood,[0,4.98,z]);
+  for(const x of [-7.1,7.1])box(0.18,4.8,0.18,wood,[x,2.5,7.8]);
+  for(let i=0;i<12;i++)box(0.1,0.18,12.1,wood,[-6+i*1.12,5.11,1.55]);
   for(let i=0;i<24;i++)box(0.06,4.7,0.12,wood,[5.15+i*0.075,2.35,-4.28]);
   for(let i=-6;i<=6;i+=2)box(0.009,0.004,13,mat('#cec6b5'),[i,0,1.8]);
   for(let i=-3;i<=8;i+=2)box(14,0.004,0.009,mat('#cec6b5'),[0,0,i]);
   label('seoshiro / PROJECT PAVILION',4.2,0.6,scene,[-2.7,3.9,-4.35]);
   label('INDEPENDENT WORK · 01—08',3.6,0.34,scene,[-2.7,3.38,-4.34]);
   const hemi=new T.HemisphereLight('#f2f6ee','#b6a38c',1.4);scene.add(hemi);
-  const sun=new T.DirectionalLight('#fff0d5',3.2);sun.position.set(-8,10,5);sun.castShadow=true;
-  sun.shadow.mapSize.set(saver?1024:2048,saver?1024:2048);sun.shadow.camera.left=-10;sun.shadow.camera.right=10;sun.shadow.camera.top=9;sun.shadow.camera.bottom=-9;sun.shadow.normalBias=0.035;sun.shadow.bias=-0.00015;sun.shadow.camera.near=0.5;sun.shadow.camera.far=35;scene.add(sun);
+  const sun=new T.DirectionalLight('#fff0d5',2.4);sun.position.set(-9,4.1,3.5);sun.castShadow=true;
+  sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-10;sun.shadow.camera.right=10;sun.shadow.camera.top=9;sun.shadow.camera.bottom=-9;sun.shadow.normalBias=0.035;sun.shadow.bias=-0.00015;sun.shadow.camera.near=0.5;sun.shadow.camera.far=35;scene.add(sun);
   const fill=new T.DirectionalLight('#eef2f3',0.65);fill.position.set(6,6,4);scene.add(fill);
   const exhibits:T.Group[]=[];
   function exhibit(id:Exhibit,pos:[number,number,number]){const g=new T.Group();g.userData.exhibit=id;g.position.set(...pos);scene.add(g);exhibits.push(g);return g;}
@@ -113,7 +126,8 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   cyl(0.355,0.013,glass,[0,0.94,0],lensBody);
   for(let i=0;i<8;i++){const blade=box(0.13,0.012,0.3,metal,[Math.sin(i*Math.PI/4)*0.11,0.917,Math.cos(i*Math.PI/4)*0.11],lensBody);blade.rotation.y=i*Math.PI/4+0.3;}
   label('LUMEN  /  50 mm',0.55,0.13,lensBody,[0,0.67,0.474],0,'#292b26','#e0ddcb');
-  label('02  /  LUMEN',1.15,0.2,lens,[0,0.91,0.831]);
+  label(plaqueText('lumen'),1.15,0.2,lens,[0,0.91,0.831]);
+  await yieldMain();
   // RESON: softly rounded timber cabinet, woven grille, rear depth and a control dial.
   const speaker=exhibit('reson',[0,0,-0.7]);plinth(speaker,1.6,0.92,1.55);
   box(1.05,1.7,0.8,wood,[0,1.83,0],speaker,0.12);
@@ -124,7 +138,8 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   const dial=cyl(0.09,0.045,metal,[0.31,2.713,0.16],speaker);dial.rotation.z=0.08;
   box(0.25,0.012,0.075,dark,[-0.19,2.686,0.2],speaker,0.01);
   label('RESON',0.42,0.105,speaker,[0,1.19,0.502],0,'#aaa58d','#3f4134');
-  label('01  /  RESON',1.16,0.2,speaker,[0,0.73,0.787]);
+  label(plaqueText('reson'),1.16,0.2,speaker,[0,0.73,0.787]);
+  await yieldMain();
   // PERCH: a deliberate open miniature, with walls, sofa cushions, rug, lamp, books and table.
   const perch=exhibit('perch',[3.15,0,1.1]);plinth(perch,2.55,0.78,2.1);
   box(2.25,0.08,1.83,wood,[0,0.86,0],perch);
@@ -144,7 +159,8 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   box(0.5,0.34,0.028,mat('#bcbfa2'),[0.45,1.6,-0.769],perch);
   cyl(0.12,0.2,mat('#b39b75'),[0.86,1.02,0.65],perch,0.09);
   for(let i=0;i<7;i++){const stem=cyl(.007,.23,green,[.86+Math.sin(i)*.04,1.24,.65+Math.cos(i)*.04],perch);stem.rotation.z=Math.sin(i)*.25;leaf(perch,[.86+Math.sin(i)*.05,1.17,.65+Math.cos(i)*.05],.3+random()*.12,Math.sin(i)*.65);}
-  label('03  /  PERCH',1.45,0.21,perch,[0,0.58,1.062]);
+  label(plaqueText('perch'),1.45,0.21,perch,[0,0.58,1.062]);
+  await yieldMain();
   // ORBIT: a miniature satellite with articulated solar arrays on a brass orbital arm.
   const orbit=exhibit('orbit',[-4.6,0,-2.9]);plinth(orbit,1.65,1.13,1.4);
   const arm=mesh(new T.TorusGeometry(0.63,0.022,8,64,Math.PI*1.5),metal,orbit);arm.position.y=1.86;arm.rotation.z=0.4;
@@ -152,7 +168,8 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   const solar=mat('#45595d',0.35,0.5);
   for(const side of [-1,1]){box(0.07,0.03,0.03,metal,[side*0.25,1.94,0],orbit);box(0.53,0.025,0.42,solar,[side*0.54,1.94,0],orbit);for(let i=0;i<5;i++)box(0.007,0.028,0.42,metal,[side*0.54-0.21+i*0.1,1.94,0],orbit);}
   const dish=mesh(new T.SphereGeometry(0.14,20,12,0,Math.PI*2,0,Math.PI*0.45),ivory,orbit);dish.position.set(0,2.23,0);dish.rotation.z=-0.4;
-  label('00  /  ORBIT',1.1,0.18,orbit,[0,0.94,0.711]);
+  label(plaqueText('orbit'),1.1,0.18,orbit,[0,0.94,0.711]);
+  await yieldMain();
   // Actual tool screenshots mounted behind timber frames. Texture loading schedules a single repaint.
   let invalidate=()=>{};
   const loader=new T.TextureLoader();
@@ -177,18 +194,39 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   for(let i=0;i<13;i++){const x=5.85+Math.sin(i)*.13,z=-2.35+Math.cos(i)*.13;const stem=cyl(.015,.7,green,[x,.75,z]);stem.rotation.z=Math.sin(i)*.35;leaf(scene,[x,.65+random()*.3,z],.8+random()*.45,Math.sin(i)*.9);}
   // Batch compatible static geometry per exhibit/material, preserving the click ownership.
   function batch(parent:T.Object3D){for(const child of [...parent.children])if(child instanceof T.Group)batch(child);const groups=new Map<string,T.Mesh[]>();for(const child of parent.children){if(!(child instanceof T.Mesh)||Array.isArray(child.material)||child.material.transparent)continue;const key=child.material.uuid;const list=groups.get(key)||[];list.push(child);groups.set(key,list);}for(const list of groups.values()){if(list.length<3)continue;const parts=list.map(m=>{m.updateMatrix();const g=m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone();g.applyMatrix4(m.matrix);return g;});const joined=mergeGeometries(parts);parts.forEach(g=>g.dispose());if(!joined)continue;const combined=mesh(joined,list[0].material as T.Material,parent);combined.castShadow=list.some(m=>m.castShadow);combined.receiveShadow=list.some(m=>m.receiveShadow);list.forEach(m=>parent.remove(m));}}
-  batch(scene);
+  batch(scene);await yieldMain();
   const target=new T.Vector3(),goalPos=new T.Vector3(),goalTarget=new T.Vector3(),startPos=new T.Vector3(),startTarget=new T.Vector3();
   let frame=0,transitionStart=0,visible=true,disposed=false,transition=false,frames=0;
-  let selectedView:View|'focus'='overview';
-  const overview=()=>window.innerWidth<700?{p:[0.8,4.8,15.5],t:[0,1.75,-0.3],fov:47}:{p:[7.7,5.5,11.3],t:[-0.1,1.55,-0.8],fov:43};
+  let selectedView:View|'focus'='overview',focused:Exhibit|null=null,previousMobile:boolean|null=null;
+  const objectIds=['orbit','lumen','reson','perch'] as Exhibit[];
+  function solidBounds(g:T.Group){const b=new T.Box3();g.updateMatrixWorld(true);g.traverse(o=>{if(o instanceof T.Mesh&&!Array.isArray(o.material)&&!o.material.transparent){o.geometry.computeBoundingBox();b.union(o.geometry.boundingBox!.clone().applyMatrix4(o.matrixWorld));}});return b;}
+  const bounds=exhibits.filter(g=>objectIds.includes(g.userData.exhibit)).map(g=>({id:g.userData.exhibit as Exhibit,box:solidBounds(g)}));
+  const corners=(b:T.Box3)=>[...Array(8)].map((_,i)=>new T.Vector3(i&1?b.max.x:b.min.x,i&2?b.max.y:b.min.y,i&4?b.max.z:b.min.z));
+  function fitPhone(p:number[],t:number[],fov:number){const probe=new T.PerspectiveCamera(fov,camera.aspect,.1,65);const points=bounds.flatMap(b=>corners(b.box));const fitted=[...p];for(let n=0;n<80;n++){probe.position.set(...fitted as [number,number,number]);probe.lookAt(new T.Vector3(...t));probe.updateMatrixWorld();if(points.every(point=>{const q=point.clone().project(probe);return Math.abs(q.x)<.87&&Math.abs(q.y)<.87;}))break;fitted[2]+=.2;}return fitted;}
+  const overview=()=>window.innerWidth<700?{p:[0,3.4,13.8],t:[0,1.85,-0.5],fov:47}:{p:[6.3,3.65,10.2],t:[-0.2,1.85,-0.7],fov:43};
   function move(p:number[],t:number[],initial=false){startPos.copy(camera.position);startTarget.copy(target);goalPos.set(p[0],p[1],p[2]);goalTarget.set(t[0],t[1],t[2]);transitionStart=performance.now();transition=!reduced.matches&&!saver;if(initial&&!entered&&transition)camera.position.add(new T.Vector3(0,0.4,1.2));if(!transition){camera.position.copy(goalPos);target.copy(goalTarget);}invalidate();}
-  function updateHotspots(){const rect=stage!.getBoundingClientRect();const projected=new T.Vector3();const mobile=window.innerWidth<700;const toolIds=['forme','selvedge','guidecheck','archiveguard'];for(const id of Object.keys(locations) as Exhibit[]){const a=stage!.querySelector<HTMLAnchorElement>(`[data-exhibit="${id}"]`);if(!a)continue;projected.set(...locations[id]).project(camera);const x=(projected.x*.5+.5)*rect.width,y=(-projected.y*.5+.5)*rect.height;a.style.left=`${x}px`;a.style.top=`${y+25}px`;const wrongView=mobile&&(selectedView==='tools'?!toolIds.includes(id):toolIds.includes(id));a.hidden=wrongView||projected.z>1||x<35||x>rect.width-35||y<5||y>rect.height-65;}}
+  function updateHotspots(){
+    const rect=stage!.getBoundingClientRect(),toolIds=['forme','selvedge','guidecheck','archiveguard'];
+    const placed:{x:number;y:number;w:number;h:number}[]=[];
+    const ids=(Object.keys(locations) as Exhibit[]).sort((a,b)=>new T.Vector3(...locations[b]).project(camera).y-new T.Vector3(...locations[a]).project(camera).y);
+    for(const id of ids){
+      const a=stage!.querySelector<HTMLAnchorElement>(`[data-exhibit="${id}"]`);if(!a)continue;
+      const projected=new T.Vector3(...locations[id]).project(camera);
+      const wrongView=selectedView==='tools'?!toolIds.includes(id):toolIds.includes(id);
+      a.hidden=wrongView||projected.z>1||Math.abs(projected.x)>1||Math.abs(projected.y)>1;if(a.hidden)continue;
+      const w=a.offsetWidth,h=a.offsetHeight,x=Math.max(w/2+8,Math.min(rect.width-w/2-8,(projected.x*.5+.5)*rect.width));
+      let y=Math.max(8,Math.min(rect.height-h-8,(-projected.y*.5+.5)*rect.height+25));
+      for(let n=0;n<8;n++){const overlap=placed.find(b=>x+w/2+6>b.x-b.w/2&&x-w/2-6<b.x+b.w/2&&y+h+6>b.y&&y-6<b.y+b.h);if(!overlap)break;y=overlap.y+overlap.h+8;if(y+h>rect.height-8)y=Math.max(8,overlap.y-h-8);}
+      a.style.left=`${x}px`;a.style.top=`${y}px`;placed.push({x,y,w,h});
+    }
+    const objectBounds=bounds.map(b=>{const points=corners(b.box).map(p=>p.project(camera));return {id:b.id,left:Math.min(...points.map(p=>p.x*.5+.5)),right:Math.max(...points.map(p=>p.x*.5+.5)),top:Math.min(...points.map(p=>-p.y*.5+.5)),bottom:Math.max(...points.map(p=>-p.y*.5+.5))};});
+    canvas!.dataset.objectBounds=JSON.stringify(objectBounds);
+  }
   function draw(now:number){frame=0;if(disposed||!visible||document.hidden)return;if(transition){const fraction=Math.min(1,(now-transitionStart)/950),eased=1-Math.pow(1-fraction,3);camera.position.lerpVectors(startPos,goalPos,eased);target.lerpVectors(startTarget,goalTarget,eased);transition=fraction<1;}camera.lookAt(target);renderer.render(scene,camera);updateHotspots();canvas!.dataset.frames=String(++frames);canvas!.dataset.triangles=String(renderer.info.render.triangles);canvas!.dataset.calls=String(renderer.info.render.calls);if(transition)frame=requestAnimationFrame(draw);}
   invalidate=()=>{if(!frame&&!disposed&&visible&&!document.hidden)frame=requestAnimationFrame(draw);};
-  function resize(){const r=stage!.getBoundingClientRect();const ratio=Math.min(window.devicePixelRatio||1,saver?1:1.5,Math.sqrt(1700000/(r.width*r.height)));renderer.setPixelRatio(ratio);renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();invalidate();}
-  function view(v:View){selectedView=v;if(v==='overview'){const o=overview();camera.fov=o.fov;move(o.p,o.t);}else if(v==='objects'){camera.fov=43;move(window.innerWidth<700?[0,3.5,12.5]:[6,3.4,7.8],[0,1.5,0.4]);}else{camera.fov=44;move(window.innerWidth<700?[2.3,2.7,6.8]:[3.6,2.85,2.4],[2.3,2,-4.1]);}camera.updateProjectionMatrix();}
-  function focus(id:Exhibit){selectedView='focus';const p=locations[id];camera.fov=43;camera.updateProjectionMatrix();move([p[0]+(id==='perch'?2.2:1.7),p[1]+1.3,p[2]+3.5],p);}
+  function resize(){const r=stage!.getBoundingClientRect();const ratio=Math.min(window.devicePixelRatio||1,saver?1:1.5,Math.sqrt(1700000/(r.width*r.height)));renderer.setPixelRatio(ratio);renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();const mobile=r.width<700;if(previousMobile!==null){if(selectedView==='focus'&&focused)focus(focused);else view(selectedView as View);}previousMobile=mobile;invalidate();}
+  function view(v:View){selectedView=v;if(v==='overview'){const o=overview();camera.fov=o.fov;move(window.innerWidth<700?fitPhone(o.p,o.t,o.fov):o.p,o.t);}else if(v==='objects'){camera.fov=43;move(window.innerWidth<700?fitPhone([0,3.2,12.5],[0,1.5,0.4],43):[6,3.4,7.8],[0,1.5,0.4]);}else{camera.fov=window.innerWidth<700?66:50;move([2.3,2.1,-.5],[2.3,2,-4.1]);}camera.updateProjectionMatrix();}
+  function focus(id:Exhibit){selectedView='focus';focused=id;const p=locations[id];camera.fov=43;camera.updateProjectionMatrix();move([p[0]+(id==='perch'?2.2:1.7),p[1]+1.3,p[2]+3.5],p);}
   const ray=new T.Raycaster(),pointer=new T.Vector2();
   function pick(e:PointerEvent){if(e.button!==0)return;const r=canvas!.getBoundingClientRect();pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(pointer,camera);const hit=ray.intersectObjects(exhibits,true)[0];if(!hit)return;let object:T.Object3D|null=hit.object;while(object&&!object.userData.exhibit)object=object.parent;if(object)onActivate(object.userData.exhibit as Exhibit);}
   const observer=new ResizeObserver(resize);observer.observe(stage);
@@ -196,7 +234,8 @@ export function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolean):Pav
   const visibility=()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;}else invalidate();};
   const lost=(e:Event)=>{e.preventDefault();stage!.closest('.pavilion')?.classList.remove('gallery-ready');stage!.closest('.pavilion')?.classList.add('gallery-unavailable');stage!.querySelector<HTMLElement>('.gallery-status')!.hidden=true;document.querySelector<HTMLElement>('.gallery-toolbar')!.hidden=true;document.querySelector<HTMLElement>('.gallery-fallback')!.hidden=false;};
   canvas.addEventListener('pointerup',pick);canvas.addEventListener('webglcontextlost',lost);document.addEventListener('visibilitychange',visibility);const reduceChange=()=>{transition=false;camera.position.copy(goalPos);target.copy(goalTarget);invalidate();};reduced.addEventListener('change',reduceChange);
-  resize();const o=overview();camera.position.set(o.p[0],o.p[1]+0.3,o.p[2]+1.3);target.set(...o.t as [number,number,number]);move(o.p,o.t,true);
+  resize();const o=overview();camera.fov=o.fov;camera.updateProjectionMatrix();camera.position.set(o.p[0],o.p[1]+0.3,o.p[2]+1.3);target.set(...o.t as [number,number,number]);move(window.innerWidth<700?fitPhone(o.p,o.t,o.fov):o.p,o.t,true);
+  camera.lookAt(target);await renderer.compileAsync(scene,camera);
   stage.closest('.pavilion')?.classList.add('gallery-ready');stage.querySelector<HTMLElement>('.gallery-status')!.hidden=true;document.querySelector<HTMLElement>('.gallery-toolbar')!.hidden=false;document.querySelector<HTMLElement>('.gallery-fallback')!.hidden=true;
   return {focus,view,dispose:()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();intersection.disconnect();document.removeEventListener('visibilitychange',visibility);reduced.removeEventListener('change',reduceChange);canvas.removeEventListener('pointerup',pick);canvas.removeEventListener('webglcontextlost',lost);geometry.forEach(g=>g.dispose());scene.traverse(o=>{if(o instanceof T.Mesh){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>materials.add(m));}});materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());environment.dispose();renderer.dispose();}};
 }
