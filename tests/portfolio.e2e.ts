@@ -57,6 +57,7 @@ test('Viewpoints, exhibit clicks, full case links, browser Back and reload are r
 test('Direct All Projects, About, Contact and catalogue nested case paths remain accessible',async({page})=>{
   for(const hash of ['work','about','contact']){
     await page.goto(`/?lang=ru#${hash}`);await expect(page.locator('dialog')).toBeVisible();
+    await expect(page.locator('dialog')).toHaveAttribute('data-panel',hash);
     await expect(page.locator('.dialog-close')).toBeFocused();
     if(hash==='work'){
       await expect(page.locator('dialog .project-card')).toHaveCount(8);
@@ -65,7 +66,17 @@ test('Direct All Projects, About, Contact and catalogue nested case paths remain
     }
     if(hash==='contact')await expect(page.locator('dialog a')).toHaveAttribute('href','https://github.com/seoshiro');
     await page.locator('.dialog-close').click();await expect(page.locator('dialog')).not.toBeVisible();
+    await expect(page).toHaveURL(/\/\?lang=ru$/);
   }
+});
+
+test('Browsers without parallel compilation retain warning-free rendering and initial modal focus',async({page})=>{
+  await page.addInitScript(()=>{const original=WebGL2RenderingContext.prototype.getExtension;Object.defineProperty(WebGL2RenderingContext.prototype,'getExtension',{value:function(this:WebGL2RenderingContext,name:string){return name==='KHR_parallel_shader_compile'?null:Reflect.apply(original,this,[name]);}});});
+  const warnings:string[]=[];page.on('console',m=>{if(m.type()==='warning')warnings.push(m.text());});
+  await page.goto('/?lang=ru#about');await ready(page);await expect(page.locator('.dialog-close')).toBeFocused();
+  await page.locator('.dialog-close').evaluate(b=>(b as HTMLButtonElement).blur());await expect(page.locator('.dialog-close')).toBeFocused();
+  await page.keyboard.press('Tab');expect(await page.locator('dialog').evaluate(d=>d.contains(document.activeElement))).toBe(true);
+  expect(warnings).toEqual([]);
 });
 test('Keyboard hotspots, native dialog focus trap, Escape and focus return work',async({page})=>{
   await page.goto('/');await ready(page);await page.keyboard.press('Tab');await expect(page.locator('.skip')).toBeFocused();

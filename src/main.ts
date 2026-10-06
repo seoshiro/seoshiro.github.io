@@ -6,7 +6,7 @@ const id=projectById(document.body.dataset.project||'')?.id||null;
 const query=new URL(window.location.href);
 let stored:string|null=null;try{stored=localStorage.getItem('seoshiro-portfolio-language-v1');}catch{/* Optional preference. */}
 let locale:Locale=validLocale(query.searchParams.get('lang'))||validLocale(stored)||'en';
-let scene:Pavilion|null=null,sequence=0,entered=false,closing=false,historyOwned=false;
+let scene:Pavilion|null=null,sequence=0,entered=false,closing=false;
 let returnFocus:HTMLElement|null=null;
 let pending:ReturnType<typeof setTimeout>|null=null;
 type Panel=ProjectId|'work'|'about'|'contact';
@@ -20,6 +20,7 @@ function renderDialog(panel:Panel) {
   const dialog=document.querySelector<HTMLDialogElement>('.gallery-dialog');if(!dialog)return;
   const body=dialog.querySelector<HTMLElement>('.dialog-body')!;
   body.innerHTML=dialogContent(locale,panel);imageFallback(body);bindCases(body);
+  dialog.dataset.panel=panel;
   if(!dialog.open){returnFocus=document.activeElement as HTMLElement;dialog.showModal();document.body.classList.add('dialog-open');}
   body.scrollTop=0;dialog.scrollTop=0;dialog.querySelector<HTMLElement>('.dialog-close')!.focus({preventScroll:true});
   void document.fonts.ready.then(()=>requestAnimationFrame(()=>{if(dialog.open&&!dialog.contains(document.activeElement))dialog.querySelector<HTMLElement>('.dialog-close')?.focus({preventScroll:true});}));
@@ -30,11 +31,11 @@ function openPanel(panel:Panel,focusScene=true) {
   if(id)return;
   if(focusScene&&scene&&projectById(panel)){enter();scene.focus(panel as Exhibit);}
   const url=new URL(window.location.href);url.hash=projectById(panel)?`project-${panel}`:panel;
-  if(window.location.hash!==url.hash){historyOwned=true;history.pushState({gallery:true},'',url);}
+  if(window.location.hash!==url.hash){history.pushState({gallery:true},'',url);}
   renderDialog(panel);
 }
 function openExhibit(exhibit:Exhibit){enter();scene?.focus(exhibit);if(pending)clearTimeout(pending);const current=sequence;const delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:520;pending=setTimeout(()=>{pending=null;if(current===sequence)openPanel(exhibit,false);},delay);}
-function closeDialog(updateHistory=true){const d=document.querySelector<HTMLDialogElement>('.gallery-dialog');if(!d?.open)return;closing=true;d.close();closing=false;document.body.classList.remove('dialog-open');scene?.view('overview');document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String((b as HTMLElement).dataset.view==='overview')));if(updateHistory){if(historyOwned){historyOwned=false;history.back();}else{const url=new URL(window.location.href);url.hash='';history.replaceState(null,'',url);}}returnFocus?.focus({preventScroll:true});}
+function closeDialog(updateHistory=true){const d=document.querySelector<HTMLDialogElement>('.gallery-dialog');if(!d?.open)return;closing=true;d.close();closing=false;document.body.classList.remove('dialog-open');scene?.view('overview');document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String((b as HTMLElement).dataset.view==='overview')));if(updateHistory){if(history.state?.gallery){history.back();}else{const url=new URL(window.location.href);url.hash='';history.replaceState(null,'',url);}}returnFocus?.focus({preventScroll:true});}
 function bindCases(root:ParentNode){root.querySelectorAll<HTMLAnchorElement>('[data-case]').forEach(a=>a.addEventListener('click',e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();openPanel(a.dataset.case as ProjectId,false);}));}
 async function enhance(){
   const current=++sequence;
@@ -47,6 +48,9 @@ async function enhance(){
   const dialog=document.querySelector<HTMLDialogElement>('.gallery-dialog')!;
   dialog.querySelector('.dialog-close')!.addEventListener('click',()=>closeDialog());
   dialog.addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
+  // Fragment navigation can reset focus after showModal during initial page load.
+  // Restore only escaped focus; movement between controls inside the dialog is retained.
+  dialog.addEventListener('focusout',()=>requestAnimationFrame(()=>{if(dialog.open&&!dialog.contains(document.activeElement))dialog.querySelector<HTMLElement>('.dialog-close')?.focus({preventScroll:true});}));
   dialog.addEventListener('close',()=>{if(!closing)closeDialog();});
   dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const m=e as MouseEvent;if(m.clientX<r.left||m.clientX>r.right||m.clientY<r.top||m.clientY>r.bottom)closeDialog();}});
   bindCases(document);
@@ -62,7 +66,9 @@ async function enhance(){
 function switchLanguage(next:Locale){if(next===locale)return;const y=window.scrollY;scene?.dispose();scene=null;sequence++;document.body.classList.remove('dialog-open');locale=next;document.getElementById('app')!.innerHTML=renderPage(locale,id);const url=new URL(window.location.href);if(locale==='en')url.searchParams.delete('lang');else url.searchParams.set('lang',locale);history.replaceState(null,'',url);try{localStorage.setItem('seoshiro-portfolio-language-v1',locale);}catch{/* Optional preference. */}void enhance().then(()=>{window.scrollTo({top:y,behavior:'instant'});if(!document.querySelector<HTMLDialogElement>('dialog')?.open)document.querySelector<HTMLButtonElement>(`[data-locale="${locale}"]`)?.focus({preventScroll:true});});}
 if(locale!=='en')document.getElementById('app')!.innerHTML=renderPage(locale,id);
 void enhance();
-window.addEventListener('popstate',()=>{if(id)return;const panel=panelFromHash();if(panel)renderDialog(panel);else{closeDialog(false);requestAnimationFrame(()=>returnFocus?.focus({preventScroll:true}));}});
+function syncPanel(){if(id)return;const panel=panelFromHash(),d=document.querySelector<HTMLDialogElement>('.gallery-dialog');if(panel){if(!d?.open||d.dataset.panel!==panel)renderDialog(panel);}else{closeDialog(false);requestAnimationFrame(()=>returnFocus?.focus({preventScroll:true}));}}
+window.addEventListener('popstate',syncPanel);
+window.addEventListener('hashchange',syncPanel);
 window.addEventListener('load',()=>{if(!id&&panelFromHash())requestAnimationFrame(()=>document.querySelector<HTMLElement>('.dialog-close')?.focus({preventScroll:true}));});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&pending){clearTimeout(pending);pending=null;scene?.view('overview');}});
 window.addEventListener('pagehide',e=>{if(!e.persisted){sequence++;scene?.dispose();}});
