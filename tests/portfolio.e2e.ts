@@ -40,7 +40,7 @@ test('Viewpoints, exhibit clicks, full case links, browser Back and reload are r
   await page.goto('/');await ready(page);
   await page.locator('[data-view="tools"]').click();await expect(page.locator('[data-view="tools"]')).toHaveAttribute('aria-pressed','true');
   for(const p of projects){
-    await page.locator(`.exhibit-rail [data-exhibit="${p.id}"]`).click();
+    await page.locator(`.exhibit-rail a[href="projects/${p.id}.html"]`).click();
     await expect(page.locator('dialog')).toBeVisible();await expect(page.locator('#dialog-title')).toHaveText(p.name);
     await expect(page).toHaveURL(new RegExp(`#project-${p.id}$`));
     await expect(page.locator('dialog')).toContainText(copy.en.project[p.id].limit);
@@ -60,9 +60,9 @@ test('Direct All Projects, About, Contact and catalogue nested case paths remain
     await expect(page.locator('dialog')).toHaveAttribute('data-panel',hash);
     await expect(page.locator('.dialog-close')).toBeFocused();
     if(hash==='work'){
-      await expect(page.locator('dialog .project-card')).toHaveCount(8);
+      await expect(page.locator('dialog .project-card')).toHaveCount(projects.length);
       await page.locator('dialog [data-case="perch"]').first().click();await expect(page.locator('#dialog-title')).toHaveText('PERCH');
-      await page.goBack();await expect(page.locator('dialog .project-card')).toHaveCount(8);
+      await page.goBack();await expect(page.locator('dialog .project-card')).toHaveCount(projects.length);
     }
     if(hash==='contact')await expect(page.locator('dialog a')).toHaveAttribute('href','https://github.com/seoshiro');
     await page.locator('.dialog-close').click();await expect(page.locator('dialog')).not.toBeVisible();
@@ -93,7 +93,7 @@ test('320, 390, tablet, desktop and wide layouts have no page overflow in EN/RU/
   for(const width of [320,390,768,1440,1920])for(const locale of locales){
     await page.setViewportSize({width,height:900});await page.goto(`/?lang=${locale}`);await ready(page);await page.evaluate(()=>document.fonts.ready);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),`${width} ${locale} home`).toBe(true);
-    await page.locator('.header nav a').first().click();await expect(page.locator('dialog .project-card')).toHaveCount(8);
+    await page.locator('.header nav a').first().click();await expect(page.locator('dialog .project-card')).toHaveCount(projects.length);
     expect(await page.locator('dialog').evaluate(d=>d.scrollWidth<=d.clientWidth+1),`${width} ${locale} catalogue`).toBe(true);
     await page.locator('dialog [data-case="archiveguard"]').first().click();
     await expect(page.locator('dialog')).toContainText(copy[locale].project.archiveguard.limit);
@@ -101,8 +101,8 @@ test('320, 390, tablet, desktop and wide layouts have no page overflow in EN/RU/
   }
 });
 test('All content remains useful without JavaScript and without WebGL',async({browser})=>{
-  const nojs=await browser.newContext({javaScriptEnabled:false});const p=await nojs.newPage();await p.goto('/');await expect(p.locator('.project-card')).toHaveCount(8);await expect(p.locator('.gallery-stage')).not.toBeVisible();await p.locator('.project-title a').first().click();await expect(p.locator('h1')).toHaveText('ORBIT.');await nojs.close();
-  const blocked=await browser.newContext();const q=await blocked.newPage();await q.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(this:HTMLCanvasElement,type,...args){if(type==='webgl2'||type==='webgl')return null;return original.call(this,type,...args);} as typeof original;});await q.goto('/');await expect(q.locator('.pavilion')).toHaveClass(/gallery-unavailable/);await expect(q.locator('.project-card')).toHaveCount(8);await q.locator('.header nav a').first().click();await expect(q.locator('dialog .project-card')).toHaveCount(8);await blocked.close();
+  const nojs=await browser.newContext({javaScriptEnabled:false});const p=await nojs.newPage();await p.goto('/');await expect(p.locator('.project-card')).toHaveCount(projects.length);await expect(p.locator('.gallery-stage')).not.toBeVisible();await p.locator('.project-title a').first().click();await expect(p.locator('h1')).toHaveText('ORBIT.');await nojs.close();
+  const blocked=await browser.newContext();const q=await blocked.newPage();await q.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(this:HTMLCanvasElement,type,...args){if(type==='webgl2'||type==='webgl')return null;return original.call(this,type,...args);} as typeof original;});await q.goto('/');await expect(q.locator('.pavilion')).toHaveClass(/gallery-unavailable/);await expect(q.locator('.project-card')).toHaveCount(projects.length);await q.locator('.header nav a').first().click();await expect(q.locator('dialog .project-card')).toHaveCount(projects.length);await blocked.close();
 });
 test('Reduced motion settles immediately; idle, offscreen and hidden scenes stop rendering',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await ready(page);await page.waitForTimeout(250);
@@ -118,7 +118,7 @@ test('Physical lens mesh clicks and a real lost WebGL context preserve the full 
   const point=await page.locator('.gallery-hotspots [data-exhibit="lumen"]').evaluate(a=>({x:parseFloat(a.style.left),y:parseFloat(a.style.top)-25}));
   await page.locator('canvas').click({position:point});await expect(page.locator('#dialog-title')).toHaveText('LUMEN');await page.keyboard.press('Escape');
   await page.locator('canvas').evaluate(c=>{const gl=(c as HTMLCanvasElement).getContext('webgl2');gl?.getExtension('WEBGL_lose_context')?.loseContext();});
-  await expect(page.locator('.pavilion')).toHaveClass(/gallery-unavailable/);await expect(page.locator('.gallery-fallback')).toBeVisible();await expect(page.locator('#work .project-card')).toHaveCount(8);
+  await expect(page.locator('.pavilion')).toHaveClass(/gallery-unavailable/);await expect(page.locator('.gallery-fallback')).toBeVisible();await expect(page.locator('#work .project-card')).toHaveCount(projects.length);
 });
 test('Save-Data caps resolution and skips animation even without system reduced motion',async({page})=>{
   await page.addInitScript(()=>{Object.defineProperty(navigator,'connection',{value:{saveData:true},configurable:true});});
@@ -145,6 +145,6 @@ test('200 percent enlarged text retains readable navigation and whole case names
 test('Runtime has no third party requests or uncaught errors and server protects source files',async({page,request})=>{
   const errors:string[]=[],thirdParty:string[]=[],warnings:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='warning')warnings.push(m.text());});page.on('request',r=>{if(new URL(r.url()).origin!==new URL(process.env.LIVE_URL||'http://127.0.0.1:5317').origin)thirdParty.push(r.url());});
   await page.goto('/');await ready(page);for(const locale of locales){await page.locator(`[data-locale="${locale}"]`).click();await ready(page);}
-  await expect(page.locator('.project-card')).toHaveCount(8);expect(errors).toEqual([]);expect(thirdParty).toEqual([]);expect(warnings).toEqual([]);
+  await expect(page.locator('.project-card')).toHaveCount(projects.length);expect(errors).toEqual([]);expect(thirdParty).toEqual([]);expect(warnings).toEqual([]);
   if(!process.env.LIVE_URL){for(const path of ['/src/content.ts','/package.json','/.git/config'])expect((await request.get(path)).status()).toBe(404);const response=await request.get('/');expect(response.headers()['content-security-policy']).toContain("connect-src 'none'");}
 });

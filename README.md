@@ -1,6 +1,6 @@
 # seoshiro — project pavilion
 
-A light architectural 3D portfolio for Beibars Ileskhan / seoshiro. Original physical exhibits introduce eight real projects: ORBIT, RESON, LUMEN, PERCH, FORME, SELVEDGE, GuideCheck and ArchiveGuard. All original EN/RU/KK project copy, screenshots, links and limitations remain available in a conventional HTML catalogue and eight standalone case pages.
+A light architectural 3D portfolio for Beibars Ileskhan / seoshiro. Original physical exhibits introduce eight real projects: ORBIT, RESON, LUMEN, PERCH, FORME, SELVEDGE, GuideCheck and ArchiveGuard. The catalogue also includes AURA, a headphone colour study using a credited CC BY 4.0 model. EN/RU/KK project copy, screenshots, links and limitations remain available in a conventional HTML catalogue and nine standalone case pages.
 
 Three.js provides the optional on-demand pavilion. Project selection moves the camera and opens a readable native HTML dialog; direct All Projects, About and Contact navigation, keyboard hotspots, touch viewpoints, Escape, browser Back and reload are supported. Reduced motion and Save-Data disable camera animation. JavaScript/WebGL failure retains the complete HTML content. No backend, analytics, audio, external runtime assets, paid actions or hosting migration is included.
 

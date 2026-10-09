@@ -1,4 +1,5 @@
 import {orbitCopy} from "./orbit.ts";
+import {auraCopy} from './aura.ts';
 import {recentCopy} from "./recent.ts";
 export const locales = ["en", "ru", "kk"] as const;
 export type Locale = (typeof locales)[number];
@@ -72,6 +73,7 @@ export const projects = [
     width: 1440,
     height: 1000,
   },
+  {id:"aura",name:"AURA",category:"INTERACTIVE PRODUCT STUDIES",stack:["JavaScript","Three.js","GLTF","CC BY 4.0"],live:"https://seoshiro.github.io/aura-headphones/",source:"https://github.com/seoshiro/aura-headphones",evidence:"https://github.com/seoshiro/aura-headphones/blob/main/docs/VERIFICATION.md",color:"#78836c",width:1440,height:1000},
 ] as const;
 export type ProjectId = (typeof projects)[number]["id"];
 export const dimensions: Record<
@@ -82,6 +84,7 @@ export const dimensions: Record<
     detail: [number, number];
   }
 > = {
+  aura: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   orbit: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   reson: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
   lumen: {main:[1440,1000],preview:[1440,1000],detail:[1440,1000]},
@@ -174,7 +177,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Explore the work",
     heroFoot: "Independent projects. Open source. Built for the browser.",
     selected: "Selected work",
-    selectedNote: "Eight projects. Different problems. The same attention to detail.",
+    selectedNote: "Nine projects. Different problems. The same attention to detail.",
     caseStudy: "Inside the project",
     live: "Live project",
     source: "Source code",
@@ -214,6 +217,7 @@ export const copy: Record<Locale, Copy> = {
       "Project screenshot unavailable. The case study and live project are still accessible.",
     project: {
       ...recentCopy.en,
+      aura:auraCopy.en,
       orbit: orbitCopy.en,
       perch: {
         category: "SPATIAL TOOLS",
@@ -343,7 +347,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Смотреть проекты",
     heroFoot: "Личные проекты. Открытый код. Работа в браузере.",
     selected: "Избранные проекты",
-    selectedNote: "Восемь проектов. Разные задачи. Одинаковое внимание к деталям.",
+    selectedNote: "Девять проектов. Разные задачи. Одинаковое внимание к деталям.",
     caseStudy: "О проекте",
     live: "Открыть проект",
     source: "Исходный код",
@@ -383,6 +387,7 @@ export const copy: Record<Locale, Copy> = {
       "Снимок проекта недоступен. Описание и ссылка на проект остаются доступны.",
     project: {
       ...recentCopy.ru,
+      aura:auraCopy.ru,
       orbit: orbitCopy.ru,
       perch: {
         category: "ПРОСТРАНСТВЕННЫЕ ИНСТРУМЕНТЫ",
@@ -511,7 +516,7 @@ export const copy: Record<Locale, Copy> = {
     viewWork: "Жобаларды көру",
     heroFoot: "Жеке жобалар. Ашық код. Браузерде жұмыс істейді.",
     selected: "Таңдаулы жобалар",
-    selectedNote: "Сегіз жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
+    selectedNote: "Тоғыз жоба. Әртүрлі міндет. Детальдарға бірдей көңіл.",
     caseStudy: "Жоба туралы",
     live: "Жобаны ашу",
     source: "Бастапқы код",
@@ -551,6 +556,7 @@ export const copy: Record<Locale, Copy> = {
       "Жоба суреті қолжетімсіз. Сипаттама мен жоба сілтемесі қолжетімді.",
     project: {
       ...recentCopy.kk,
+      aura:auraCopy.kk,
       orbit: orbitCopy.kk,
       perch: {
         category: "КЕҢІСТІК ҚҰРАЛДАРЫ",

@@ -1,0 +1,19 @@
+HEADPHONES — xemimia
+Original model: https://sketchfab.com/3d-models/headphones-5f7233c10f0f43d882bf6b704c7530c5
+Author: https://sketchfab.com/xemimia
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+Downloaded without authentication through the publicly distributed Objaverse dataset:
+https://huggingface.co/datasets/allenai/objaverse/resolve/main/glbs/000-098/5f7233c10f0f43d882bf6b704c7530c5.glb
+Dataset: https://huggingface.co/datasets/allenai/objaverse
+Objaverse / Ai2, Deitke et al. 2022. Dataset as a whole: ODC-By 1.0.
+https://opendatacommons.org/licenses/by/1-0/
+Individual model license independently verified against the author's public Sketchfab metadata on 2026-10-09:
+https://api.sketchfab.com/v3/models/5f7233c10f0f43d882bf6b704c7530c5
+The author metadata specifies CC Attribution, commercial use allowed, attribution required, with the CC BY 4.0 URL.
+
+Adaptations in AURA: original mesh topology retained; source transforms normalized, original texture replaced by proposed Chalk/Moss/Ink surface treatments; vertex color and roughness variation, studio lighting, camera poses and rendered WebP fallbacks added. The distributed GLB is the unchanged dataset file. Adapted appearances are also covered by CC BY 4.0. No endorsement by the author or Ai2 is implied. AURA is an independent fictional visual identity, not a manufactured product or acoustic specification.
+
+CC BY 4.0 allows sharing and adaptation, including redistribution and commercial use, provided appropriate attribution, the license link and a description of changes are retained. No warranties are given. Preserve this notice when redistributing the model or adapted renders. Three.js is separately MIT licensed; bundled font licenses are included next to each font.

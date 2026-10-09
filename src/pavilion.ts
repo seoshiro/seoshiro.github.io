@@ -4,7 +4,7 @@ import {environmentInfo} from './environment-info.ts';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {projects,type ProjectId} from './content.ts';
 
-export type Exhibit = ProjectId|'about';
+export type Exhibit = Exclude<ProjectId,'aura'>|'about';
 export type View = 'overview'|'objects'|'tools';
 export interface Pavilion {focus:(id:Exhibit)=>void; view:(view:View)=>void; dispose:()=>void}
 const locations: Record<Exhibit,[number,number,number]> = {
@@ -173,7 +173,7 @@ export async function startPavilion(onActivate:(id:Exhibit)=>void,entered:boolea
   // Actual tool screenshots mounted behind timber frames. Texture loading schedules a single repaint.
   let invalidate=()=>{};
   const loader=new T.TextureLoader();
-  for(const id of ['forme','selvedge','guidecheck','archiveguard'] as ProjectId[]) {
+  for(const id of ['forme','selvedge','guidecheck','archiveguard'] as Exclude<ProjectId,'aura'>[]) {
     const pos=locations[id],g=exhibit(id,[pos[0],pos[1],-4.17]);
     box(1.7,1.12,0.1,wood,[0,0,0],g,0.018);
     box(1.58,0.99,0.07,ivory,[0,0,0.07],g);
