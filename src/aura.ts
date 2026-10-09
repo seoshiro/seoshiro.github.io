@@ -1,52 +1,48 @@
 import type {Locale,ProjectCopy} from './content.ts';
 export const auraCopy:Record<Locale,ProjectCopy>={
-  "en": {
-    "category": "INTERACTIVE PRODUCT STUDIES",
-    "title": "An object.\nA quieter palette.",
-    "summary": "An editorial headphone colour study with a licensed 3D asset, an intact camera detail tour, and a small working finish configurator.",
-    "alt": "Actual AURA site with the Moss headphone finish, warm typography and colour controls",
-    "detailAlt": "Actual AURA detail study showing the intact licensed headphone model and accessible viewpoint controls",
-    "input": "Explore the object in English or Russian. Choose Chalk, Moss or Ink, scroll through three viewpoints, or use the detail controls.",
-    "output": "A responsive colour study and a downloadable text record of your selected finish, without an order or payment.",
-    "decisions": [
-      "The ready-made HEADPHONES model by xemimia is used under CC BY 4.0, downloaded through the open Objaverse dataset. The site credits the author and records source, license and rendering adaptations.",
-      "Local Three.js assets provide studio lighting and proposed satin and cushion surfaces. Natural scrolling changes the camera around the intact model; it does not invent internal components.",
-      "English and Russian retain a stable product stage. Reduced motion, keyboard controls, a focus-managed configurator and rendered image fallbacks preserve access without WebGL."
+  en:{
+    category:'INTERACTIVE PRODUCT STUDIES',title:'Hard lines.\nSoft contact.',
+    summary:'A dark headphone design study with original procedural 3D geometry, a natural camera tour and a working visual-card configurator.',
+    alt:'Actual AURA A–01 website with graphite metal headphones, editorial typography and glass finish controls',
+    detailAlt:'Actual AURA metal-shell detail with polished edges, surface droplets and accessible view controls',
+    input:'Explore the object in English or Russian. Choose Graphite, Titanium or Oxide, follow the camera tour or pin a detail view.',
+    output:'A responsive product concept and a PNG card with the selected headphone render, finish, background and localized notes, without ordering or payment.',
+    decisions:[
+      'One original procedural assembly creates all five views: metal frame, visible adjustment and pivots, oval cushions, stitched seams and surface-anchored droplets. No third-party headphone mesh or product photography is used.',
+      'Real WebGL geometry and its optimized still renders share the same materials and lighting. Desktop scroll and subtle pointer parallax reveal the object; manual views remain pinned until the user resumes following scroll.',
+      'English and Russian keep a stable product stage. Bounded loading, persisted motion-off, reduced motion, keyboard dialogs and color-aware stills preserve access without WebGL. The configurator exports a real visual PNG card.'
     ],
-    "limit": "A fictional visual identity and material proposal using a credited model. No physical product, acoustic measurement, tested comfort or manufacturing claim. Chrome desktop and emulated mobile were checked; physical Safari devices were not.",
-    "caption": "Actual AURA capture. 3D base: HEADPHONES by xemimia, CC BY 4.0; adapted materials and lighting."
+    limit:'A fictional design and material study. No manufactured product, acoustic measurement, tested comfort or water-resistance claim. Chrome desktop and emulated mobile were checked; physical Safari devices were not.',
+    caption:'Actual AURA capture. Original procedural headphone geometry and studio renders, created for this concept.'
   },
-  "ru": {
-    "category": "ИНТЕРАКТИВНЫЕ ИССЛЕДОВАНИЯ ПРОДУКТОВ",
-    "title": "Один объект.\nСпокойнее палитра.",
-    "summary": "Редакционный цветовой этюд наушников: лицензионная 3D-модель, смена ракурсов цельного объекта и работающий конфигуратор отделки.",
-    "alt": "Реальный сайт AURA: наушники цвета Мох, тёплая типографика и выбор цвета",
-    "detailAlt": "Реальный раздел деталей AURA с цельной лицензионной моделью и доступными кнопками ракурсов",
-    "input": "Изучайте объект на английском или русском. Выберите Мел, Мох или Тушь; прокручивайте три ракурса или используйте кнопки.",
-    "output": "Адаптивный цветовой этюд и скачиваемая текстовая запись выбранного цвета без заказа и оплаты.",
-    "decisions": [
-      "Готовая модель HEADPHONES автора xemimia используется по CC BY 4.0 и загружена через открытый набор Objaverse. Автор указан на сайте; источник, лицензия и изменения сохранены в репозитории.",
-      "Локальные ресурсы Three.js создают студийное освещение и предложенные сатиновые и мягкие поверхности. Обычная прокрутка меняет ракурс цельной модели без вымышленных внутренних деталей.",
-      "Русский и английский сохраняют стабильный размер продукта. Уменьшенная анимация, клавиатура, фокус в конфигураторе и готовые изображения обеспечивают доступ без WebGL."
+  ru:{
+    category:'ИНТЕРАКТИВНЫЕ ПРОДУКТОВЫЕ ИССЛЕДОВАНИЯ',title:'Чёткие линии.\nМягкий контакт.',
+    summary:'Тёмный концепт наушников с оригинальной процедурной 3D-конструкцией, плавной сменой ракурсов и конфигуратором визуальных карточек.',
+    alt:'Реальный сайт AURA A–01: графитовые металлические наушники, редакционная типографика и стеклянные контролы отделки',
+    detailAlt:'Реальный этюд металлического корпуса AURA: полированные кромки, капли на поверхности и доступные контролы ракурса',
+    input:'Изучайте объект на русском или английском. Выберите Графит, Титан или Оксид; следуйте за камерой или закрепите нужный ракурс.',
+    output:'Адаптивный концепт и PNG-карточка с выбранным рендером наушников, отделкой, фоном и локализованными заметками. Без заказов и оплаты.',
+    decisions:[
+      'Одна оригинальная процедурная конструкция создаёт все пять ракурсов: металлическая рама, регуляторы и шарниры, овальные подушки, швы и закреплённые на поверхности капли. Чужих моделей наушников и фотографий продукта нет.',
+      'Настоящая WebGL-геометрия и оптимизированные рендеры используют одинаковые материалы и свет. Прокрутка и небольшой параллакс раскрывают объект; ручной ракурс сохраняется до явного возврата к прокрутке.',
+      'Русский и английский сохраняют размеры продукта. Ограниченная загрузка, сохранение motion-off, reduced motion, клавиатурные диалоги и рендеры выбранной отделки поддерживают доступ без WebGL. Конфигуратор сохраняет настоящую PNG-карточку.'
     ],
-    "limit": "Вымышленная айдентика и предложение материалов на основе лицензионной модели. Без реального товара, измерений звука, проверенного комфорта и производственных утверждений. Проверены Chrome и эмуляция мобильных экранов; физические устройства Safari не проверялись.",
-    "caption": "Реальный скриншот AURA. 3D-основа: HEADPHONES — xemimia, CC BY 4.0; изменены материалы и освещение."
+    limit:'Вымышленный дизайн и этюд материалов. Готового продукта, измерений звука, проверенного комфорта и защиты от воды нет. Проверены Chrome и эмуляция мобильных экранов; физические устройства Safari не проверялись.',
+    caption:'Реальный снимок AURA. Оригинальная процедурная конструкция наушников и студийные рендеры, созданные для этого концепта.'
   },
-  "kk": {
-    "category": "ИНТЕРАКТИВТІ ӨНІМ ЗЕРТТЕУЛЕРІ",
-    "title": "Бір нысан.\nТыныш палитра.",
-    "summary": "Лицензияланған 3D моделі, тұтас нысанның ракурстары және әрлеуді таңдауға арналған жұмыс істейтін конфигураторы бар құлаққап түс зерттеуі.",
-    "alt": "AURA сайтының нақты көрінісі: Moss түсті құлаққап, жылы типография және түс басқаруы",
-    "detailAlt": "AURA бөлшек зерттеуі: тұтас лицензиялық модель және қолжетімді ракурс батырмалары",
-    "input": "Нысанды ағылшын не орыс тілінде зерттеңіз. Chalk, Moss немесе Ink түсін таңдаңыз; үш ракурсты айналдырып немесе батырмамен көріңіз.",
-    "output": "Бейімделетін түс зерттеуі және таңдалған әрлеудің жүктелетін мәтіндік жазбасы. Тапсырыс пен төлем жоқ.",
-    "decisions": [
-      "xemimia авторының дайын HEADPHONES моделі CC BY 4.0 бойынша ашық Objaverse жинағынан алынған. Автор сайтта көрсетілген; дереккөз, лицензия және өзгерістер репозиторийде сақталған.",
-      "Жергілікті Three.js ресурстары студиялық жарық пен ұсынылған сатин және жұмсақ беттерді жасайды. Табиғи айналдыру тұтас модельдің ракурсын өзгертеді; ішкі бөлшектер ойдан қосылмаған.",
-      "Ағылшын және орыс тілдері өнім аймағының тұрақты өлшемін сақтайды. Азайтылған қозғалыс, пернетақта, конфигуратор фокусы және дайын суреттер WebGL жоқта қолжетімділікті сақтайды."
+  kk:{
+    category:'ИНТЕРАКТИВТІ ӨНІМ ЗЕРТТЕУЛЕРІ',title:'Айқын сызықтар.\nЖұмсақ жанасу.',
+    summary:'Түпнұсқа процедуралық 3D конструкциясы, камера ракурстары және визуалды карточка конфигураторы бар қара түсті құлаққап концепті.',
+    alt:'AURA A–01 сайтының нақты көрінісі: графит түсті металл құлаққап, редакциялық типографика және шыны әрлеу басқармалары',
+    detailAlt:'AURA металл корпусының нақты көрінісі: жылтыр жиектер, беттегі тамшылар және қолжетімді ракурс басқармалары',
+    input:'Нысанды ағылшын немесе орыс тілінде зерттеңіз. Графит, Титан не Оксид әрлеуін таңдаңыз; камераға ілесіңіз немесе ракурсты бекітіңіз.',
+    output:'Таңдалған құлаққап рендері, әрлеуі, фоны және жергілікті тілдегі ескертпелері бар PNG карточка мен бейімделетін концепт. Тапсырыс пен төлем жоқ.',
+    decisions:[
+      'Бір түпнұсқа процедуралық конструкция бес ракурсты жасайды: металл доға, көрінетін реттегіштер мен топсалар, сопақ жастықтар, тігістер және бетке бекітілген тамшылар. Бөтен құлаққап моделі не өнім фотосы қолданылмайды.',
+      'Нақты WebGL геометриясы мен оңтайланған рендерлердің материалы және жарығы бірдей. Компьютердегі айналдыру мен шағын параллакс нысанды ашады; қолмен таңдалған ракурс қайта ілесу қосылғанша сақталады.',
+      'Ағылшын және орыс тілдері өнім өлшемін сақтайды. Шектеулі жүктеу, сақталатын motion-off, reduced motion, пернетақта диалогтары мен әрлеу рендерлері WebGL жоқ кезде де қолжетімді. Конфигуратор нақты PNG карточка сақтайды.'
     ],
-    "limit": "Лицензиялық модель негізіндегі ойдан шығарылған айдентика мен материал ұсынысы. Нақты өнім, дыбыс өлшемі, тексерілген жайлылық немесе өндірістік мәлімдеме жоқ. Chrome және мобильді экран эмуляциясы тексерілген; нақты Safari құрылғылары тексерілмеген.",
-    "caption": "AURA-ның нақты скриншоты. 3D негізі: HEADPHONES — xemimia, CC BY 4.0; материалдар мен жарық өзгертілген."
+    limit:'Ойдан шығарылған дизайн және материал зерттеуі. Өндірілген өнім, дыбыс өлшемі, тексерілген жайлылық не судан қорғаныс мәлімдемесі жоқ. Chrome және мобильді экран эмуляциясы тексерілді; нақты Safari құрылғылары тексерілмеді.',
+    caption:'AURA сайтының нақты түсірілімі. Осы концептке жасалған түпнұсқа процедуралық құлаққап конструкциясы мен студиялық рендерлер.'
   }
 };
-

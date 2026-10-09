@@ -73,7 +73,7 @@ export const projects = [
     width: 1440,
     height: 1000,
   },
-  {id:"aura",name:"AURA",category:"INTERACTIVE PRODUCT STUDIES",stack:["JavaScript","Three.js","GLTF","CC BY 4.0"],live:"https://seoshiro.github.io/aura-headphones/",source:"https://github.com/seoshiro/aura-headphones",evidence:"https://github.com/seoshiro/aura-headphones/blob/main/docs/VERIFICATION.md",color:"#78836c",width:1440,height:1000},
+  {id:"aura",name:"AURA",category:"INTERACTIVE PRODUCT STUDIES",stack:["JavaScript","Three.js","Procedural 3D","PNG export"],live:"https://seoshiro.github.io/aura-headphones/",source:"https://github.com/seoshiro/aura-headphones",evidence:"https://github.com/seoshiro/aura-headphones/blob/main/docs/VERIFICATION.md",color:"#86919e",width:1440,height:1000},
 ] as const;
 export type ProjectId = (typeof projects)[number]["id"];
 export const dimensions: Record<

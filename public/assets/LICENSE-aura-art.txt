@@ -1,0 +1,12 @@
+AURA A–01 screenshots and renders
+
+Copyright (c) 2026 seoshiro. MIT.
+
+Actual screenshots of https://seoshiro.github.io/aura-headphones/
+captured on 9 October 2026 at 1440 x 1000 pixels, then encoded as WebP.
+The headphone is an original procedural 3D assembly created for AURA.
+The images do not contain a downloaded headphone mesh or third-party product photography.
+Fonts and Three.js have their own licenses in the AURA source repository.
+
+Source: https://github.com/seoshiro/aura-headphones
+Evidence: https://github.com/seoshiro/aura-headphones/blob/main/docs/VERIFICATION.md
