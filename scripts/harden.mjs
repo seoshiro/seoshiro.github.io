@@ -6,7 +6,7 @@ const policy =
   "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'";
 for (const file of [
   "index.html",
-  ...["aura", "orbit", "reson", "lumen", "perch", "forme", "selvedge", "guidecheck", "archiveguard"].map(
+  ...["orbit", "reson", "lumen", "perch", "forme", "selvedge", "guidecheck", "archiveguard"].map(
     (id) => `projects/${id}.html`,
   ),
 ]) {
@@ -31,6 +31,6 @@ await writeFile(
 );
 await writeFile(
   "dist/sitemap.xml",
-  `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", ...["aura", "orbit", "reson", "lumen", "perch", "forme", "selvedge", "guidecheck", "archiveguard"].map((id) => `projects/${id}.html`)].map((path) => `<url><loc>${origin}/${path}</loc></url>`).join("")}</urlset>`,
+  `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${["", ...["orbit", "reson", "lumen", "perch", "forme", "selvedge", "guidecheck", "archiveguard"].map((id) => `projects/${id}.html`)].map((path) => `<url><loc>${origin}/${path}</loc></url>`).join("")}</urlset>`,
 );
-console.log("Production CSP applied to all ten static pages.");
+console.log("Production CSP applied to all nine static pages.");

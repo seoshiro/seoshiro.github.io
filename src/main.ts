@@ -29,7 +29,7 @@ function enter(){entered=true;document.querySelector('.pavilion')?.classList.add
 function openPanel(panel:Panel,focusScene=true) {
   if(pending){clearTimeout(pending);pending=null;}
   if(id)return;
-  if(focusScene&&scene&&panel!=="aura"&&projectById(panel)){enter();scene.focus(panel as Exhibit);}
+  if(focusScene&&scene&&projectById(panel)){enter();scene.focus(panel as Exhibit);}
   const url=new URL(window.location.href);url.hash=projectById(panel)?`project-${panel}`:panel;
   if(window.location.hash!==url.hash){history.pushState({gallery:true},'',url);}
   renderDialog(panel);

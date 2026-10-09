@@ -6,7 +6,6 @@ export default defineConfig({
     target: "es2022",
     rollupOptions: {
       input: {
-        aura: resolve("projects/aura.html"),
         home: resolve("index.html"),
         orbit: resolve("projects/orbit.html"),
         reson: resolve("projects/reson.html"),
