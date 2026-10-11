@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      PORTFOLIO_COMMIT: f5731a2024c9f0f5c192b4bddb0b61599307c088
+      PORTFOLIO_COMMIT: 3493fbb2bbdd43c43301d822130f5d6f1201f98a
     steps:
       - name: Check out the verified portfolio source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: seoshiro/portfolio-constellation
-          ref: f5731a2024c9f0f5c192b4bddb0b61599307c088
+          ref: 3493fbb2bbdd43c43301d822130f5d6f1201f98a
           persist-credentials: false
       - name: Verify exact source revision
         run: test "$(git rev-parse HEAD)" = "$PORTFOLIO_COMMIT"
