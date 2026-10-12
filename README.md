@@ -4,13 +4,13 @@ The main portfolio is [seoshiro.github.io](https://seoshiro.github.io/). Sources
 
 ## Pinned release — 2026-10-12
 
-Source: **329cfd7e611e1d9db10bf66c9d6bacbfe91aa675**. [Exact source verification CI](https://github.com/seoshiro/portfolio-constellation/actions/runs/38281859542). [Root verification and Pages deployment](https://github.com/seoshiro/seoshiro.github.io/actions/workflows/publish.yml). [Live release manifest](https://seoshiro.github.io/version.json).
+Source: **bdffb0e339ac92eb24a8ea80152a76fc44528d46**. [Exact source verification CI](https://github.com/seoshiro/portfolio-constellation/actions/runs/38287000060). [Root verification and Pages deployment](https://github.com/seoshiro/seoshiro.github.io/actions/workflows/publish.yml). [Live release manifest](https://seoshiro.github.io/version.json).
 
 The single publish.yml checks out that exact source, repeats verification, builds and publishes static dist through this repository's existing Pages environment. Both ref and PORTFOLIO_COMMIT must match. Historical root files remain available for recovery; separate application repositories and Pages projects are unchanged.
 
 The editorial release updates the home page, all eleven cases, previews, captions, alternative text and existing metadata in RU/EN/KK. It replaces generic slogans with project actions, identifies GitHub as a profile and retains factual product limits. AYQYN distinguishes human review, local photographic test fixtures and public replay diagrams, with explicit tool attribution. LUMEN describes its current lens-only scene and identifies the preserved earlier screenshot.
 
-The dark atlas, Manrope/Onest fonts, angular cursor, entry, music, card reveals, media hover, native transitions, typing and exact catalogue return are unchanged. No dependency or source workflow changes.
+The dark atlas, Manrope/Onest fonts, angular cursor, entry, music, card reveals, media hover, native transitions, typing and exact catalogue return are unchanged. No dependency or source workflow changes. Two browser-test race conditions were isolated: locale selection waits for a rendered control, and the mouse is parked outside the moving map during keyboard/touch assertions. Application behavior and all assertions are unchanged.
 
 Lint, TypeScript, 12 unit tests, all 89 browser scenarios, build/artifact checks, 144 additional localized page/viewport checks, actual pixels and independent factual/editorial review passed before pinning. Physical phones, Safari and native Kazakh editorial review were unavailable; mobile/touch coverage uses installed Chrome.
 
