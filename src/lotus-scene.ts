@@ -28,7 +28,7 @@ export async function startLotus(onSelect:(project:string)=>void):Promise<LotusS
   const fill=new THREE.DirectionalLight(0xf3f6ff,.8);fill.position.set(5,3,-3);scene.add(fill);
   scene.add(new THREE.HemisphereLight(0xfff7ea,0x54504a,.7));
   const group=new THREE.Group();scene.add(group);
-  let disposed=false,contextLost=false,frame=0,progress=0,moving=true,frozenProgress=0,active='perch',hover=-1;
+  let disposed=false,contextLost=false,frame=0,progress=0,moving=true,frozenProgress=0,active='save-slot',hover=-1;
   let px=0,py=0,width=0,height=0,framesLeft=1;
   let press:{pointer:number;petal:number;x:number;y:number;scroll:number}|null=null;
   const ray=new THREE.Raycaster(),pointer=new THREE.Vector2();

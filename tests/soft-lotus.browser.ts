@@ -17,8 +17,9 @@ test('Early static shell honors language while the 3D application bundle is unav
     await expect(page.locator('html')).toHaveAttribute('lang',locale);
     await expect(page.locator('.scene-introduction h1')).toHaveText(sceneCopy[locale].headline);
     await expect(page.locator('.hero-offer')).toHaveText(sceneCopy[locale].intro);
-    await expect(page.locator('.hero-actions a').first()).toHaveAttribute('href',new RegExp(`projects/perch.html\\?lang=${locale}$`));
-    await expect(page.locator('.scene-index>a').first()).toHaveAttribute('href',new RegExp(`projects/perch.html\\?lang=${locale}$`));
+    await expect(page.locator('.hero-actions a').first()).toHaveAttribute('href',new RegExp(`projects/save-slot.html\\?lang=${locale}$`));
+    await expect(page.locator('.scene-index>a').first()).toHaveAttribute('href',new RegExp(`projects/save-slot.html\\?lang=${locale}$`));
+    await expect(page.locator('.scene-index details a').first()).toContainText('SAVE SLOT');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
   }
 });
@@ -31,11 +32,11 @@ test('Main work action opens a visible project list and returns keyboard focus i
     const action=page.locator('#hero-work'),list=page.locator('#work-list'),close=page.locator('.work-browser-close');
     await action.focus();await page.keyboard.press('Enter');
     await expect(action).toHaveAttribute('aria-expanded','true');await expect(list).toBeVisible();await expect(close).toBeFocused();
-    await expect(list.locator('a')).toHaveCount(11);
+    await expect(list.locator('a')).toHaveCount(projects.length);
     await page.keyboard.press('Tab');await expect(list.locator('a').first()).toBeFocused();
     await page.keyboard.press('Escape');await expect(list).toBeHidden();await expect(action).toBeFocused();
     await page.keyboard.press('Space');await expect(list).toBeVisible();
-    await list.locator(`a[href*="projects/perch.html"]`).click();await expect(page).toHaveURL(new RegExp(`projects/perch.html\\?lang=${locale}$`));
+    await list.locator(`a[href*="projects/save-slot.html"]`).click();await expect(page).toHaveURL(new RegExp(`projects/save-slot.html\\?lang=${locale}$`));
   }
   await page.route('**/models/*.glb',route=>route.abort());
   for(const viewport of [{width:390,height:844},{width:320,height:640}]){
@@ -88,7 +89,9 @@ test('All-project catalog excludes the selected card and restores selection and 
       await expect(dialog).toBeVisible();await expect(close).toBeFocused();
       await expect(page.locator('.petal-preview')).toBeHidden();await expect(page.locator('.petal-labels')).toBeHidden();
       await expect(page.locator('.soft-canvas')).toHaveAttribute('data-decor','paused');
-      expect(page.url()).toBe(selectedURL);await expect(links).toHaveCount(11);
+      expect(page.url()).toBe(selectedURL);await expect(links).toHaveCount(projects.length);
+      await expect(links.first()).toHaveAttribute('href', `projects/save-slot.html?lang=${locale}`);
+      await expect(links.filter({hasText:'PERCH'})).toHaveCount(1);
       await page.keyboard.press('Tab');await expect(links.first()).toBeFocused();
       await page.keyboard.press('Shift+Tab');await expect(close).toBeFocused();
       await page.keyboard.press('Shift+Tab');await expect(links.last()).toBeFocused();
@@ -109,7 +112,7 @@ test('All-project catalog excludes the selected card and restores selection and 
       await page.locator('#hero-work').click();await expect(dialog).toBeVisible();await close.click();await expect(page.locator('#hero-work')).toBeFocused();
       // Real project links keep the locale, and browser Back cannot reopen two competing panels.
       await page.locator('#index-selvedge').click();await trigger.click();
-      await links.locator('strong').filter({hasText:'PERCH'}).click();await expect(page).toHaveURL(new RegExp(`projects/perch.html\\?lang=${locale}$`));
+      await links.locator('strong').filter({hasText:'SAVE SLOT'}).click();await expect(page).toHaveURL(new RegExp(`projects/save-slot.html\\?lang=${locale}$`));
       await page.goBack();await expect(page.locator('body')).toHaveAttribute('data-petal','selvedge');
       await expect(dialog).toBeHidden();await expect(page.locator('.petal-preview')).toBeVisible();
     }
@@ -150,7 +153,7 @@ test('Catalog reversals preserve the live pose and home navigation reuses the lo
   expect(await page.evaluate(()=>performance.timeOrigin)).toBe(identity);
   expect(await page.evaluate(()=>document.querySelector('canvas')===(window as unknown as {originalCanvas:HTMLCanvasElement}).originalCanvas)).toBe(true);
   expect(modelRequests).toBe(1);
-  await page.locator('#index-perch').click();await page.locator('#index-all').click();await page.goBack();
+  await page.locator('#index-save-slot').click();await page.locator('#index-all').click();await page.goBack();
   await expect(dialog).toBeHidden();await expect(page.locator('body')).toHaveAttribute('data-view','overview');
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.locator('#hero-work').click();await expect(dialog).toHaveAttribute('data-phase','open');
@@ -171,8 +174,8 @@ test('Focus restoration follows visible controls under CPU throttling', async ({
     await hero.focus();await page.keyboard.press('Enter');await expect(page.locator('#work-browser')).toHaveAttribute('data-phase','open');
     await page.keyboard.press('Tab');await page.keyboard.press('Escape');
     await expect(page.locator('#work-browser')).toBeHidden();await expect(hero).toBeFocused();
-    await page.locator('#index-perch').click();await page.locator('#preview-case-perch').click();
-    await page.keyboard.press('Escape');await expect(page.locator('#preview-case-perch')).toBeFocused();
+    await page.locator('#index-save-slot').click();await page.locator('#preview-case-save-slot').click();
+    await page.keyboard.press('Escape');await expect(page.locator('#preview-case-save-slot')).toBeFocused();
   }
 });
 
@@ -184,39 +187,39 @@ test('Cached revisit skips the opening delay and share errors expose a selectabl
   await page.reload();
   await expect(page.locator('body')).toHaveAttribute('data-model','ready', { timeout: 20000 });
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-bloom','1.000');
-  await page.locator('#index-perch').click();await page.locator('#preview-case-perch').click();
+  await page.locator('#index-save-slot').click();await page.locator('#preview-case-save-slot').click();
   await page.evaluate(()=>Object.defineProperty(navigator,'clipboard',{value:{writeText:()=>Promise.reject(new Error('blocked'))},configurable:true}));
   await page.locator('.reader-links button').click();
-  await expect(page.locator('.share-manual input')).toHaveValue(new RegExp('projects/perch.html\\?lang=en$'));
-  await page.keyboard.press('Escape');await expect(page.locator('#preview-case-perch')).toBeFocused();
+  await expect(page.locator('.share-manual input')).toHaveValue(new RegExp('projects/save-slot.html\\?lang=en$'));
+  await page.keyboard.press('Escape');await expect(page.locator('#preview-case-save-slot')).toBeFocused();
 });
 
-test('Draft PERCH flow preserves real content, Back, Escape and exact trigger focus', async ({ page }) => {
+test('Draft SAVE SLOT flow preserves real content, Back, Escape and exact trigger focus', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto(`${entry}?lang=ru`);
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-asset', 'accepted', { timeout: 20000 });
-  await page.locator('#index-perch').click();
-  await expect(page.locator('.petal-preview')).toContainText('PERCH');
-  await page.locator('#preview-case-perch').click();
+  await page.locator('#index-save-slot').click();
+  await expect(page.locator('.petal-preview')).toContainText('SAVE SLOT');
+  await page.locator('#preview-case-save-slot').click();
   await expect(page.getByRole('dialog')).toBeVisible();
-  await expect(page.getByRole('dialog').locator('img').first()).toHaveJSProperty('naturalWidth', 1440);
+  await expect(page.getByRole('dialog').locator('img').first()).toHaveJSProperty('naturalWidth', dimensions['save-slot'].main[0]);
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await expect(page.locator('#preview-case-perch')).toBeFocused();
+  await expect(page.locator('#preview-case-save-slot')).toBeFocused();
   await expect(page.locator('body')).toHaveAttribute('data-view', 'selected');
-  await page.locator('#preview-case-perch').click();
+  await page.locator('#preview-case-save-slot').click();
   await page.goBack();
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await expect(page.locator('body')).toHaveAttribute('data-petal', 'perch');
+  await expect(page.locator('body')).toHaveAttribute('data-petal', 'save-slot');
   await mkdir('evidence/lotus-v2/flow', { recursive: true });
-  await page.screenshot({ path: 'evidence/lotus-v2/flow/perch-return-1440.png' });
+  await page.screenshot({ path: 'evidence/lotus-v2/flow/save-slot-return-1440.png' });
   expect(errors).toEqual([]);
 });
 
 test('All five draft entries retain their state across three languages', async ({ page }) => {
   await page.goto(`${entry}?lang=en`);
-  for (const id of ['perch', 'selvedge', 'forme', 'about', 'contact']) {
+  for (const id of ['save-slot', 'selvedge', 'forme', 'about', 'contact']) {
     await page.locator(`#index-${id}`).click();
     for (const locale of ['ru', 'kk', 'en']) {
       await page.locator(`.soft-languages button[lang="${locale}"]`).click();
@@ -224,12 +227,12 @@ test('All five draft entries retain their state across three languages', async (
       await expect(page).toHaveTitle(`${copy[locale as 'ru'|'en'|'kk'].name} — ${sceneCopy[locale as 'ru'|'en'|'kk'].headline}`);
       await expect(page.locator('body')).toHaveAttribute('data-petal', id);
       await expect(page.locator('.petal-preview')).toBeVisible();
-      await expect(page.locator('#preview-title')).toHaveText(['perch','selvedge','forme'].includes(id) ? id.toUpperCase() : sceneCopy[locale as 'ru'|'en'|'kk'][id as 'about'|'contact']);
+      await expect(page.locator('#preview-title')).toHaveText(['save-slot','selvedge','forme'].includes(id) ? id === 'save-slot' ? 'SAVE SLOT' : id.toUpperCase() : sceneCopy[locale as 'ru'|'en'|'kk'][id as 'about'|'contact']);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     }
-    if (['perch', 'selvedge', 'forme'].includes(id)) {
+    if (['save-slot', 'selvedge', 'forme'].includes(id)) {
       await page.locator(`#preview-case-${id}`).click();
-      await expect(page.getByRole('dialog')).toContainText(id.toUpperCase());
+      await expect(page.getByRole('dialog')).toContainText(id === 'save-slot' ? 'SAVE SLOT' : id.toUpperCase());
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).not.toBeVisible();
     }
@@ -240,24 +243,25 @@ test('Phone draft case has accessible controls and a constrained reader', async 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`${entry}?lang=kk`);
-  await page.locator('#index-perch').click();
-  await page.locator('#preview-case-perch').click();
+  await page.locator('#index-save-slot').click();
+  await page.locator('#preview-case-save-slot').click();
   await expect(page.getByRole('dialog')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   const violations = (await new AxeBuilder({ page }).analyze()).violations;
   expect(violations).toEqual([]);
   await mkdir('evidence/lotus-v2/flow', { recursive: true });
-  await page.screenshot({ path: 'evidence/lotus-v2/flow/perch-reader-390.png' });
+  await page.screenshot({ path: 'evidence/lotus-v2/flow/save-slot-reader-390.png' });
   await page.keyboard.press('Escape');
-  await expect(page.locator('#preview-case-perch')).toBeFocused();
+  await expect(page.locator('#preview-case-save-slot')).toBeFocused();
 });
 
 test('No JavaScript still exposes the real case URLs', async ({ browser }) => {
   const page = await browser.newPage({ javaScriptEnabled: false });
   await page.goto(`${base}${entry}`);
-  await expect(page.locator('.scene-index > a').filter({hasText:'PERCH'})).toHaveAttribute('href', 'projects/perch.html?lang=ru');
-  await page.locator('.scene-index > a').filter({hasText:'PERCH'}).click();
-  await expect(page.locator('h1')).toContainText('PERCH');
+  await expect(page.locator('.scene-index > a').filter({hasText:'SAVE SLOT'})).toHaveAttribute('href', 'projects/save-slot.html?lang=ru');
+  await expect(page.locator('.scene-index details a').first()).toContainText('SAVE SLOT');
+  await page.locator('.scene-index > a').filter({hasText:'SAVE SLOT'}).click();
+  await expect(page.locator('h1')).toContainText('SAVE SLOT');
   await page.close();
 });
 
@@ -320,14 +324,14 @@ test('Loading keeps the same bud and model failure retains useful navigation', a
   await expect(page.locator('.ink-loading')).toBeVisible();
   await expect(page.locator('.soft-canvas')).toBeHidden();
   await expect(page.locator('progress')).not.toHaveAttribute('value', '100');
-  await page.locator('#index-perch').click();
-  await page.locator('#preview-case-perch').click();
-  await expect(page.getByRole('dialog')).toContainText('PERCH');
+  await page.locator('#index-save-slot').click();
+  await page.locator('#preview-case-save-slot').click();
+  await expect(page.getByRole('dialog')).toContainText('SAVE SLOT');
   release();
   await expect(page.locator('body')).toHaveAttribute('data-model', 'failed');
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.locator('#preview-case-perch')).toBeFocused();
+  await expect(page.locator('#preview-case-save-slot')).toBeFocused();
   await expect(page.locator('.scene-poster img')).toHaveAttribute('src', /selected-desktop/);
   await page.locator('.scene-poster img').evaluate(image => (image as HTMLImageElement).decode());
 });
@@ -337,21 +341,21 @@ test('Mobile asset, all five projected controls and repeated selection remain us
   await page.goto(`${entry}?lang=en`);
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-asset-url', /mobile.glb/);
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-bloom', '1.000');
-  for (const id of ['perch', 'selvedge', 'forme', 'about', 'contact']) {
+  for (const id of ['save-slot', 'selvedge', 'forme', 'about', 'contact']) {
     const button=page.locator(`#petal-${id}`);
     await expect(button).toBeVisible();
     const box=await button.boundingBox();
     expect(box!.x).toBeGreaterThanOrEqual(0); expect(box!.x+box!.width).toBeLessThanOrEqual(391);
   }
-  await page.locator('#petal-perch').click();
+  await page.locator('#petal-save-slot').click();
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
-  await page.screenshot({path:'evidence/lotus-v2/flow/perch-selected-390.png'});
-  for(const id of ['forme','selvedge','about','contact','perch']) await page.locator(`#index-${id}`).click({delay:10});
-  await expect(page.locator('body')).toHaveAttribute('data-petal','perch');
-  await page.locator('#preview-case-perch').click();
+  await page.screenshot({path:'evidence/lotus-v2/flow/save-slot-selected-390.png'});
+  for(const id of ['forme','selvedge','about','contact','save-slot']) await page.locator(`#index-${id}`).click({delay:10});
+  await expect(page.locator('body')).toHaveAttribute('data-petal','save-slot');
+  await page.locator('#preview-case-save-slot').click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.locator('#preview-case-perch')).toBeFocused();
+  await expect(page.locator('#preview-case-save-slot')).toBeFocused();
 });
 
 test('Overview and selected content remain accessible at small and large viewports', async ({ page }) => {
@@ -380,7 +384,7 @@ test('WebGL context loss leaves all content reachable', async ({ page }) => {
   await expect(page.getByRole('dialog')).toContainText('FORME');
 });
 
-test('All eleven cases preserve real evidence and EN/RU/KK at 360px', async ({ page }) => {
+test('All twelve cases preserve real evidence and EN/RU/KK at 360px', async ({ page }) => {
   test.setTimeout(90000);
   await page.setViewportSize({width:360,height:800});
   for(const locale of ['en','ru','kk'] as const) for(const project of projects) {
@@ -408,7 +412,7 @@ test('Legacy locale URLs keep translated cases and home, with and without JavaSc
       await expect(page.locator('html')).toHaveAttribute('lang',locale);
     }
     const staticPage=await browser.newPage({javaScriptEnabled:false});
-    for(const path of ['index.html','projects/perch.html','credits.html']) {
+    for(const path of ['index.html','projects/save-slot.html','credits.html']) {
       expect((await staticPage.goto(`${base}${prefix}/${locale}/${path}`))?.status()).toBe(200);
       await expect(staticPage.locator('html')).toHaveAttribute('lang',locale);
       expect(await staticPage.locator('a[href]').count()).toBeGreaterThan(0);
@@ -441,9 +445,9 @@ test('Touch selection preserves a separate flower area and readable project cont
       await expect(page.locator('body')).toHaveAttribute('data-model','ready',{timeout:20000});
       await expect(page.locator('.soft-canvas')).toHaveAttribute('data-decor','paused');
       await page.locator('#petal-forme').tap();
-      for (const id of ['forme','perch','selvedge']) {
+      for (const id of ['forme','save-slot','selvedge']) {
         await page.locator(`#index-${id}`).tap();
-        await expect(page.locator('#preview-title')).toHaveText(id.toUpperCase());
+        await expect(page.locator('#preview-title')).toHaveText(id === 'save-slot' ? 'SAVE SLOT' : id.toUpperCase());
         const boundary = Number(await page.locator('.soft-canvas').getAttribute('data-content-boundary'));
         const box = await page.locator('.petal-preview').boundingBox();
         expect(box!.y).toBeGreaterThanOrEqual(boundary-1);
@@ -484,13 +488,13 @@ test('Fallback gives accurate directions, readable navigation and uncropped shor
       await expect(page.locator('.scene-poster')).toHaveCSS('opacity','1');
       const status = await page.locator('.scene-bottom').boundingBox(), nav = await page.locator('.scene-index').boundingBox();
       expect(status!.y + status!.height).toBeLessThanOrEqual(nav!.y);
-      for(const id of ['perch','selvedge','forme','contact']) {
+      for(const id of ['save-slot','selvedge','forme','contact']) {
         await page.locator(`#index-${id}`).click();
         expect(await page.locator('.petal-preview').evaluate(el=>el.scrollHeight<=el.clientHeight+1)).toBe(true);
         expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
-        if(locale==='ru'&&id==='perch') {
+        if(locale==='ru'&&id==='save-slot') {
           await mkdir('evidence/lotus-v2/fallback-review',{recursive:true});
-          await page.screenshot({path:`evidence/lotus-v2/fallback-review/perch-${viewport.width}.png`});
+          await page.screenshot({path:`evidence/lotus-v2/fallback-review/save-slot-${viewport.width}.png`});
           expect((await new AxeBuilder({page}).analyze()).violations).toEqual([]);
         }
         await page.locator('.preview-close').click();

@@ -13,6 +13,7 @@ export const softLotusAsset: {
   sourceJobId: '4ccf52ab-d439-444b-ad96-3011e8a11578',
 };
 
+// The first legacy-named node now links to SAVE SLOT by its unchanged index.
 export const softLotusContract = {
   petalNodes: ['Petal_perch', 'Petal_selvedge', 'Petal_forme', 'Petal_about', 'Petal_contact'],
   anchorNodes: ['Anchor_perch', 'Anchor_selvedge', 'Anchor_forme', 'Anchor_about', 'Anchor_contact'],

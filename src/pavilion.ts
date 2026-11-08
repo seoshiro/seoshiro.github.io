@@ -4,7 +4,7 @@ import {environmentInfo} from './environment-info.ts';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {projects,type ProjectId as CurrentProjectId} from './content.ts';
 // Archived pavilion implementation: its eight exhibits predate the lotus release.
-type ProjectId = Exclude<CurrentProjectId, 'iter'|'ayqyn'|'sidereal'>;
+type ProjectId = Exclude<CurrentProjectId, 'iter'|'ayqyn'|'sidereal'|'save-slot'>;
 
 export type Exhibit = ProjectId|'about';
 export type View = 'overview'|'objects'|'tools';

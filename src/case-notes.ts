@@ -1,9 +1,10 @@
+import { saveSlotNotes } from './save-slot.ts';
 import type { Locale, ProjectId } from './content.ts';
 
 export const projectLabels: Record<Locale, Record<ProjectId, string>> = {
-  ru: { orbit: 'Орбитальная учебная студия', reson: 'Конфигуратор акустики', lumen: 'Интерактивная история объектива', perch: 'Планировщик комнаты', forme: 'Мудборды и дизайн-наборы', selvedge: 'Студия принтов', guidecheck: 'Проверки по руководствам', archiveguard: 'Контроль целостности файлов', iter: 'Учебная навигация по зданию', ayqyn: 'Локальный прототип прокторинга', sidereal: 'Музыкальные созвездия' },
-  en: { orbit: 'Orbital learning studio', reson: 'Speaker configurator', lumen: 'Interactive lens story', perch: 'Room planner', forme: 'Moodboards & design kits', selvedge: 'Print workroom', guidecheck: 'Guideline review workspace', archiveguard: 'File integrity checks', iter: 'Educational building navigator', ayqyn: 'Local proctoring prototype', sidereal: 'Musical constellations' },
-  kk: { orbit: 'Орбиталарды үйрену студиясы', reson: 'Акустика конфигураторы', lumen: 'Объективтің интерактивті тарихы', perch: 'Бөлме жоспарлаушысы', forme: 'Мудбордтар мен дизайн жинақтары', selvedge: 'Принт студиясы', guidecheck: 'Нұсқаулық бойынша тексеру', archiveguard: 'Файл тұтастығын тексеру', iter: 'Ғимараттың оқу навигаторы', ayqyn: 'Жергілікті прокторинг прототипі', sidereal: 'Музыкалық шоқжұлдыздар' },
+  ru: { 'save-slot': 'Шесть игровых миров', orbit: 'Орбитальная учебная студия', reson: 'Конфигуратор акустики', lumen: 'Интерактивная история объектива', perch: 'Планировщик комнаты', forme: 'Мудборды и дизайн-наборы', selvedge: 'Студия принтов', guidecheck: 'Проверки по руководствам', archiveguard: 'Контроль целостности файлов', iter: 'Учебная навигация по зданию', ayqyn: 'Локальный прототип прокторинга', sidereal: 'Музыкальные созвездия' },
+  en: { 'save-slot': 'Six playable worlds', orbit: 'Orbital learning studio', reson: 'Speaker configurator', lumen: 'Interactive lens story', perch: 'Room planner', forme: 'Moodboards & design kits', selvedge: 'Print workroom', guidecheck: 'Guideline review workspace', archiveguard: 'File integrity checks', iter: 'Educational building navigator', ayqyn: 'Local proctoring prototype', sidereal: 'Musical constellations' },
+  kk: { 'save-slot': 'Алты ойын әлемі', orbit: 'Орбиталарды үйрену студиясы', reson: 'Акустика конфигураторы', lumen: 'Объективтің интерактивті тарихы', perch: 'Бөлме жоспарлаушысы', forme: 'Мудбордтар мен дизайн жинақтары', selvedge: 'Принт студиясы', guidecheck: 'Нұсқаулық бойынша тексеру', archiveguard: 'Файл тұтастығын тексеру', iter: 'Ғимараттың оқу навигаторы', ayqyn: 'Жергілікті прокторинг прототипі', sidereal: 'Музыкалық шоқжұлдыздар' },
 };
 
 // Product choices and corrections are grounded in the linked repository notes.
@@ -16,6 +17,7 @@ export const caseLabels = {
 type Note = { role: string; problem: string; choices: string[]; fix: string; scenario: string };
 export const caseNotes: Record<Locale, Partial<Record<ProjectId, Note>>> = {
   ru: {
+    'save-slot': saveSlotNotes.ru,
     perch: {
       problem: 'Для человека, который хочет сравнить расстановки своей комнаты до перестановки мебели. Отправная точка — реальные размеры, а не красивый рендер без масштаба.',
       role: 'Моя роль — постановка задачи, направление AI-assisted реализации и оценка результата. В PERCH фокус работы — связать план, объём и сравнение вариантов в понятный сценарий. Код и автоматизированные проверки подготовлены с ИИ; их результаты и ограничения сохранены в репозитории.',
@@ -39,6 +41,7 @@ export const caseNotes: Record<Locale, Partial<Record<ProjectId, Note>>> = {
     },
   },
   en: {
+    'save-slot': saveSlotNotes.en,
     perch: {
       problem: 'For someone comparing layouts before moving their furniture. Real room measurements are the starting point, rather than an image without scale.',
       role: 'I define the brief, direct AI-assisted implementation and review the result. For PERCH, the focus is a coherent path through the plan, 3D view and layout comparison. Code and automated checks were prepared with AI; the repository records their results and limits.',
@@ -62,6 +65,7 @@ export const caseNotes: Record<Locale, Partial<Record<ProjectId, Note>>> = {
     },
   },
   kk: {
+    'save-slot': saveSlotNotes.kk,
     perch: {
       problem: 'Жиһазды жылжытпай тұрып бөлме нұсқаларын салыстырғысы келетін адамға арналған. Бастапқы негіз — масштабсыз сурет емес, бөлменің нақты өлшемдері.',
       role: 'Мен міндетті анықтаймын, ИИ көмегімен іске асыруды бағыттаймын және нәтижені бағалаймын. PERCH жобасында жоспар, 3D көрініс және нұсқаларды салыстыру бір сценарийге біріктірілді. Код пен автоматты тексерулер ИИ көмегімен дайындалды; нәтижелері мен шектеулері репозиторийде сақталған.',

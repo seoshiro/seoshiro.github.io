@@ -18,30 +18,30 @@ test('Legacy section links migrate without losing language or poisoning later na
 
 test('An early project selection survives late model readiness and failure', () => {
   for (const status of ['ready', 'failed'] as const) {
-    const selected = sceneReducer(initial(), { type: 'select', id: 'perch', source: 'petal-perch' });
+    const selected = sceneReducer(initial(), { type: 'select', id: 'save-slot', source: 'petal-save-slot' });
     const result = sceneReducer(selected, { type: 'model', status });
     assert.equal(result.view, 'selected');
-    assert.equal(result.active, 'perch');
-    assert.equal(result.returnFocus, 'petal-perch');
+    assert.equal(result.active, 'save-slot');
+    assert.equal(result.returnFocus, 'petal-save-slot');
     assert.equal(result.model, status);
   }
 });
 
 test('Case close restores the selected petal and preserves locale and focus origin', () => {
-  let state = sceneReducer(initial(), { type: 'read', id: 'perch', source: 'preview-case-perch' });
+  let state = sceneReducer(initial(), { type: 'read', id: 'save-slot', source: 'preview-case-save-slot' });
   state = sceneReducer(state, { type: 'locale', locale: 'kk' });
   state = sceneReducer(state, { type: 'back' });
-  assert.equal(state.active, 'perch');
+  assert.equal(state.active, 'save-slot');
   assert.equal(state.view, 'selected');
   assert.equal(state.locale, 'kk');
-  assert.equal(state.returnFocus, 'preview-case-perch');
+  assert.equal(state.returnFocus, 'preview-case-save-slot');
   state = sceneReducer(state, { type: 'back' });
   assert.equal(state.active, null);
   assert.equal(state.view, 'overview');
 });
 
 test('Rapid input and history restoration cannot revive the previous case', () => {
-  let state = sceneReducer(initial(), { type: 'read', id: 'perch' });
+  let state = sceneReducer(initial(), { type: 'read', id: 'save-slot' });
   state = sceneReducer(state, { type: 'select', id: 'forme' });
   state = sceneReducer(state, { type: 'route', route: { locale: 'en', active: null, view: 'overview' } });
   state = sceneReducer(state, { type: 'model', status: 'ready' });

@@ -73,3 +73,18 @@ test("Project descriptions retain the narrow product and human evidence boundari
     !/years of|clients|award-winning|trusted by|revenue/i.test(copy.en.intro),
   );
 });
+
+
+test("SAVE SLOT leads the portfolio without removing PERCH or overstating save and authorship", () => {
+  assert.equal(projects[0].id, 'save-slot');
+  assert.ok(projects.some(p => p.id === 'perch'));
+  assert.equal(projects.filter(p => p.id === 'save-slot').length, 1);
+  for (const l of locales) {
+    const t = copy[l].project['save-slot'];
+    assert.match(t.limit, /RU\/EN/);
+    assert.ok(t.limit.length > 200);
+  }
+  assert.match(copy.en.project['save-slot'].limit, /current browser tab\/session/);
+  assert.match(copy.en.project['save-slot'].decisions.join(' '), /AI-generated asset cleaned in Blender/);
+  assert.match(copy.en.project['save-slot'].summary, /six playable worlds/);
+});

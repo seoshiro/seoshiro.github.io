@@ -72,7 +72,7 @@ test('Mobile project copy waits for the flower to clear its reading area even af
     await expect(page.locator('body')).toHaveAttribute('data-model', 'ready', { timeout: 20000 });
     await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
     await startProbe(page);
-    await page.locator('#index-perch').click();
+    await page.locator('#index-save-slot').click();
     await page.waitForTimeout(190);
     await page.locator('#index-forme').click();
     await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
@@ -91,13 +91,13 @@ test('Early case entry and rapid project changes never squash or strand the prod
     await expect(page.locator('body')).toHaveAttribute('data-model', 'ready', { timeout: 20000 });
     await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
     await startProbe(page);
-    await page.locator('#index-perch').click();
-    await page.locator('#preview-case-perch').click();
+    await page.locator('#index-save-slot').click();
+    await page.locator('#preview-case-save-slot').click();
     await page.waitForTimeout(100);
     await page.keyboard.press('Escape');
     await expect(page.locator('body')).toHaveAttribute('data-view', 'selected');
     await expect(page.locator('.preview-product')).toHaveCSS('transform', 'none');
-    for (const id of ['forme', 'selvedge', 'perch', 'forme']) {
+    for (const id of ['forme', 'selvedge', 'save-slot', 'forme']) {
       await page.locator(`#index-${id}`).click();
       await page.waitForTimeout(90);
     }
@@ -122,7 +122,7 @@ test('Every shared case fits the whole flower in its actual column and adapts wh
   await expect(page.locator('body')).toHaveAttribute('data-model', 'ready', { timeout: 20000 });
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
   const originalCanvas = await page.locator('canvas').elementHandle();
-  for (const [index, id] of ['perch', 'selvedge', 'forme'].entries()) {
+  for (const [index, id] of ['save-slot', 'selvedge', 'forme'].entries()) {
     await page.getByRole('button', { name: ['RU', 'EN', 'KK'][index], exact: true }).click();
     await page.locator(`#index-${id}`).click();
     await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
@@ -141,7 +141,7 @@ test('Every shared case fits the whole flower in its actual column and adapts wh
       expect(await page.locator('.soft-stage').evaluate(el => (el as HTMLElement).inert)).toBe(true);
       expect(await page.locator('#scene-index').evaluate(el => (el as HTMLElement).inert)).toBe(true);
       await expect(page.locator('.reader-top button')).toBeInViewport();
-      await expect(page.locator('#reader-title')).toHaveText(id.toUpperCase());
+      await expect(page.locator('#reader-title')).toHaveText(id === 'save-slot' ? 'SAVE SLOT' : id.toUpperCase());
     }
     await page.keyboard.press('Escape');
     await expect(page.locator('.case-reader')).toBeHidden();
@@ -164,7 +164,7 @@ test('Reader and flower stay clear through Escape and history reversals without 
   await page.setViewportSize({ width, height: 900 });
   await page.goto(`${entry}?lang=ru`);
   await expect(page.locator('body')).toHaveAttribute('data-model', 'ready', { timeout: 20000 });
-  await page.locator('#index-perch').click();
+  await page.locator('#index-save-slot').click();
   await expect(page.locator('.soft-canvas')).toHaveAttribute('data-animating', 'false');
   await page.clock.pauseAt(await page.evaluate(() => Date.now() + 20));
   const sampled = page.evaluate(async () => {
@@ -178,13 +178,13 @@ test('Reader and flower stay clear through Escape and history reversals without 
     }
     return frames;
   });
-  await page.locator('#preview-case-perch').click();
+  await page.locator('#preview-case-save-slot').click();
   await advanceScene(170); await page.keyboard.press('Escape');
   await advanceScene(120); await page.goForward();
   await advanceScene(650); await page.goBack();
   await advanceScene(650);
   await expect(page.locator('.case-reader')).toBeHidden();
-  await page.locator('#preview-case-perch').click();
+  await page.locator('#preview-case-save-slot').click();
   await advanceScene(650); await page.locator('.reader-top button').click();
   await advanceScene(650);
   await expect(page.locator('.case-reader')).toBeHidden();
@@ -215,9 +215,9 @@ test('Reading remains usable with reduced motion and a failed model', async ({ p
   await page.route('**/models/*.glb', route => route.abort());
   await page.goto(`${entry}?lang=en`);
   await expect(page.locator('body')).toHaveAttribute('data-model', 'failed');
-  await page.locator('#index-perch').click();
-  await page.locator('#preview-case-perch').click();
-  await expect(page.locator('#reader-title')).toHaveText('PERCH');
+  await page.locator('#index-save-slot').click();
+  await page.locator('#preview-case-save-slot').click();
+  await expect(page.locator('#reader-title')).toHaveText('SAVE SLOT');
   const poster = await page.locator('.scene-poster').boundingBox(), reader = await page.locator('.case-reader').boundingBox();
   expect(poster!.x + poster!.width).toBeLessThanOrEqual(reader!.x + 1);
   await expect(page.locator('.scene-poster img')).toHaveCSS('object-fit', 'contain');
@@ -226,5 +226,5 @@ test('Reading remains usable with reduced motion and a failed model', async ({ p
   await expect(page.locator('.scene-poster')).toBeHidden();
   await page.locator('.reader-top button').click();
   await expect(page.locator('.case-reader')).toBeHidden();
-  await expect(page.locator('#preview-case-perch')).toBeFocused();
+  await expect(page.locator('#preview-case-save-slot')).toBeFocused();
 });

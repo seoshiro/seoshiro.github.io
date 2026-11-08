@@ -1,4 +1,5 @@
 import {orbitCopy} from "./orbit.ts";
+import {saveSlotCopy} from "./save-slot.ts";
 import {recentCopy} from "./recent.ts";
 export const locales = ["en", "ru", "kk"] as const;
 export type Locale = (typeof locales)[number];
@@ -6,6 +7,7 @@ export function validLocale(value: string | null): Locale | null {
   return locales.includes(value as Locale) ? (value as Locale) : null;
 }
 export const projects = [
+  {id:"save-slot",name:"SAVE SLOT",category:"INTERACTIVE WEB EXPERIENCE",stack:["React","TypeScript","Vite","Three.js","GSAP","Canvas2D"],live:"https://seoshiro.github.io/save-slot/",source:"https://github.com/seoshiro/save-slot",evidence:"https://github.com/seoshiro/save-slot/blob/main/docs/ITERATION-2026-11-08-GAMES.md",color:"#ece6d6",width:1366,height:768},
   {id:"orbit",name:"ORBIT",category:"EDUCATIONAL TOOLS",stack:["TypeScript","Three.js","Orbital mechanics","LocalStorage"],live:"https://seoshiro.github.io/orbit-studio/",source:"https://github.com/seoshiro/orbit-studio",evidence:"https://github.com/seoshiro/orbit-studio/blob/main/docs/VERIFICATION.md",color:"#c1afff",width:1440,height:1000},
   {id:"reson",name:"RESON",category:"01 / PRODUCT DESIGN TOOLS",stack:["TypeScript","Three.js","WebGL","LocalStorage"],live:"https://seoshiro.github.io/reson-studio/",source:"https://github.com/seoshiro/reson-studio",evidence:"https://github.com/seoshiro/reson-studio/blob/main/docs/AUDITS.md",color:"#b68962",width:1440,height:1000},
   {id:"lumen",name:"LUMEN",category:"02 / INTERACTIVE PRODUCT STUDIES",stack:["TypeScript","Three.js","WebGL","Scroll choreography"],live:"https://seoshiro.github.io/lumen-lens/",source:"https://github.com/seoshiro/lumen-lens",evidence:"https://github.com/seoshiro/lumen-lens/blob/main/README.md",color:"#bdb5a3",width:1440,height:1000},
@@ -134,6 +136,7 @@ export const dimensions: Record<
     detail: [number, number];
   }
 > = {
+  "save-slot": {main:[1366,768],preview:[1366,768],detail:[1366,768]},
   iter: {"main":[1440,1000],"preview":[1440,1000],"detail":[1440,1000]},
   ayqyn: {"main":[1800,1200],"preview":[1800,1200],"detail":[1800,1200]},
   sidereal: {"main":[1920,1080],"preview":[1920,1080],"detail":[390,844]},
@@ -269,6 +272,7 @@ export const copy: Record<Locale, Copy> = {
       "Project screenshot unavailable. The case study and live project are still accessible.",
     project: {
       ...recentCopy.en,
+      "save-slot": saveSlotCopy.en,
       orbit: orbitCopy.en,
       iter: {
         "category": "Navigation and accessibility",
@@ -486,6 +490,7 @@ export const copy: Record<Locale, Copy> = {
       "Снимок проекта недоступен. Описание и ссылка на проект остаются доступны.",
     project: {
       ...recentCopy.ru,
+      "save-slot": saveSlotCopy.ru,
       orbit: orbitCopy.ru,
       iter: {
         "category": "Навигация и доступность",
@@ -702,6 +707,7 @@ export const copy: Record<Locale, Copy> = {
       "Жоба суреті қолжетімсіз. Сипаттама мен жоба сілтемесі қолжетімді.",
     project: {
       ...recentCopy.kk,
+      "save-slot": saveSlotCopy.kk,
       orbit: orbitCopy.kk,
       iter: {
         "category": "Навигация және қолжетімділік",

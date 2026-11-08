@@ -110,7 +110,7 @@ export function App() {
     if (state.model !== 'ready') return;
     // Decode the three real product previews during the opening, without
     // delaying model readiness or fetching any case/detail image.
-    for (const id of ['perch','selvedge','forme']) {
+    for (const id of ['save-slot','selvedge','forme']) {
       const image = new Image(); image.decoding = 'async'; image.fetchPriority = 'low'; image.src = `assets/${id}.webp`;
       void image.decode().catch(() => { /* The visible image retains its thumbnail background. */ });
     }
@@ -137,7 +137,7 @@ export function App() {
     const source = current.current.returnFocus;
     // A direct URL has a synthetic petal source, which can be absent in the
     // no-WebGL/mobile view. The semantic index is its reliable destination.
-    pendingFocus.current = source && !source.startsWith('petal-') ? source : `index-${current.current.active || 'perch'}`;
+    pendingFocus.current = source && !source.startsWith('petal-') ? source : `index-${current.current.active || 'save-slot'}`;
     flushPendingFocus();
   }
   function back() {
@@ -255,7 +255,7 @@ export function App() {
       queueMicrotask(() => focusNavigation(source));
     }, { signal: controller.signal });
     const instance = createRuntime(host.current!, labels.current!, id => { rememberPetal(id); navigation.current({ type: 'select', id, source: `petal-${id}` }); }, ready => dispatch({ type: 'model', status: ready ? 'ready' : 'failed' }), setLoadProgress, playing => {
-      if (!playing && document.activeElement?.classList.contains('intro-skip')) document.getElementById('index-perch')?.focus({ preventScroll: true });
+      if (!playing && document.activeElement?.classList.contains('intro-skip')) document.getElementById('index-save-slot')?.focus({ preventScroll: true });
       setIntroPlaying(playing);
     });
     runtime.current = instance; instance.update(current.current);
@@ -329,7 +329,7 @@ export function App() {
   }, [state.active, state.reducedMotion, state.model, previewId]);
   useLayoutEffect(() => () => { previewMotion.current.forEach(tween => tween.kill()); }, []);
 
-  const petalName = (id: PetalId) => isFeatured(id) ? id.toUpperCase() : s[id];
+  const petalName = (id: PetalId) => isFeatured(id) ? projects.find(p => p.id === id)!.name : s[id];
   const percent = loadProgress.phase === 'transfer' && loadProgress.total ? Math.min(99, Math.floor(loadProgress.loaded / loadProgress.total * 100)) : undefined;
   const loadLabel = loadProgress.phase === 'prepare' ? s.prepare : s.transfer;
   return <>
@@ -368,7 +368,7 @@ export function App() {
           </svg>
           <p role="status">{loadLabel}{percent !== undefined ? ` · ${percent}%` : ''}</p><progress className="scene-loading" aria-label={loadLabel} max={100} value={percent} />
         </div>}
-        <div className="scene-bottom"><div>{introPlaying ? <button type="button" className="intro-skip" onClick={() => { runtime.current?.skipIntro(); document.getElementById('index-perch')?.focus({ preventScroll: true }); }}>{s.skipIntro} <span aria-hidden="true">· Esc</span></button> : <p role="status">{state.model === 'failed' ? s.fallback : state.model === 'ready' ? s.ready : ''}</p>}</div><button type="button" aria-pressed={state.reducedMotion} onClick={() => dispatch({ type: 'motion', reduced: !state.reducedMotion })}>{s.motion}</button></div>
+        <div className="scene-bottom"><div>{introPlaying ? <button type="button" className="intro-skip" onClick={() => { runtime.current?.skipIntro(); document.getElementById('index-save-slot')?.focus({ preventScroll: true }); }}>{s.skipIntro} <span aria-hidden="true">· Esc</span></button> : <p role="status">{state.model === 'failed' ? s.fallback : state.model === 'ready' ? s.ready : ''}</p>}</div><button type="button" aria-pressed={state.reducedMotion} onClick={() => dispatch({ type: 'motion', reduced: !state.reducedMotion })}>{s.motion}</button></div>
       </div>
       <nav id="scene-index" className="scene-index" inert={state.view === 'case'} aria-label={`${s.scene} - ${s.all}`}><span id="work" />{petalIds.map((id, index) => <button id={`index-${id}`} type="button" key={id} aria-pressed={state.active === id} onClick={event => select(event, id)}><span>0{index + 1}</span> {petalName(id)}</button>)}<button id="index-all" type="button" aria-haspopup="dialog" aria-expanded={workOpen} aria-controls="work-browser" onClick={event => openWork(event.currentTarget)}>{s.all}</button></nav>
       <dialog ref={workDialog} id="work-browser" className="work-browser" aria-labelledby="work-browser-title" data-native-scroll onKeyDown={containWorkTab} onCancel={event => { event.preventDefault(); event.stopPropagation(); setWorkOpen(false); }} onClose={event => { if (!event.currentTarget.open && !workOpenRef.current) setWorkOpen(false); }}>

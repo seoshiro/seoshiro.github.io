@@ -22,5 +22,13 @@
     "width": 320,
     "height": 192,
     "bytes": 12008
+  },
+  {
+    "source": "docs/originals/save-slot.webp",
+    "sourceSHA256": "02eba8386414cca810d073172fa9ef22871df79069e3b3fe56e90bd95701abac",
+    "file": "public/assets/save-slot-petal.webp",
+    "width": 320,
+    "height": 180,
+    "bytes": 12042
   }
 ]

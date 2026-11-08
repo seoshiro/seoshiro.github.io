@@ -32,15 +32,20 @@ async function advance(page: Page, milliseconds: number) {
   for (let left = milliseconds; left > 0; left -= 50) await page.clock.fastForward(Math.min(left, 50));
 }
 async function loadPaused(page: Page, locale: string, verifyLoading = false) {
-  if (!clockPages.has(page)) { await page.clock.install(); clockPages.add(page); }
-  else await page.clock.resume();
+  if (!clockPages.has(page)) {
+    // Pause on the empty document before navigation. A cross-process Date.now()+20
+    // deadline can already be in the past on a busy machine. No feature time
+    // elapses before the loader and scene mount, including repeated visits.
+    await page.clock.install({ time: new Date('2026-11-04T00:00:00Z') });
+    await page.clock.pauseAt(new Date('2026-11-04T00:01:00Z'));
+    clockPages.add(page);
+  }
   await page.addInitScript(() => sessionStorage.removeItem('soft-lotus-intro-v2'));
   let release!: () => void;
   const transfer = new Promise<void>(resolve => { release = resolve; });
   await page.route('**/models/*.glb', async route => { await transfer; await route.continue(); });
   await page.goto(`${entry}?lang=${locale}`, { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.ink-loading')).toBeVisible();
-  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 20));
   if (verifyLoading) {
     await advance(page, 250);
     await expect(page.locator('.soft-canvas')).toHaveAttribute('data-intro', 'waiting');
@@ -92,12 +97,12 @@ for (const method of ['escape', 'tap', 'button'] as const) test(`Opening can be 
   await expect(scene).toHaveAttribute('data-bloom', '1.000');
   await expect(page.locator('body')).toHaveAttribute('data-view', 'overview');
   await expect(page.locator('.ink-loading')).toHaveCount(0);
-  if (method === 'button') await expect(page.locator('#index-perch')).toBeFocused();
+  if (method === 'button') await expect(page.locator('#index-save-slot')).toBeFocused();
 });
 
 test('Early project and gallery navigation complete the entrance once, preserving the scene through returns and history', async ({ page }) => {
   test.setTimeout(60000);
-  for (const action of ['#hero-work', '#index-perch']) {
+  for (const action of ['#hero-work', '#index-save-slot']) {
     await loadPaused(page, 'ru');
     const scene = page.locator('.soft-canvas');
     await expect(page.locator('.intro-skip')).toBeVisible({ timeout: 20000 });
@@ -105,7 +110,7 @@ test('Early project and gallery navigation complete the entrance once, preservin
     await page.evaluate(() => { (window as unknown as SampleWindow).originalCanvas = document.querySelector('.soft-canvas canvas')!; });
     await page.locator(action).click();
     if (action === '#hero-work') { await advance(page, 150); await page.keyboard.press('Escape'); await advance(page, 800); await expect(page.locator('#work-browser')).toBeHidden(); }
-    else { await advance(page, 600); await page.locator('#preview-case-perch').click(); await advance(page, 200); await page.keyboard.press('Escape'); await advance(page, 700); await expect(page.locator('.case-reader')).toBeHidden(); await page.locator('.signature').click(); await advance(page, 700); await page.goBack(); await advance(page, 700); await page.goForward(); await advance(page, 700); }
+    else { await advance(page, 600); await page.locator('#preview-case-save-slot').click(); await advance(page, 200); await page.keyboard.press('Escape'); await advance(page, 700); await expect(page.locator('.case-reader')).toBeHidden(); await page.locator('.signature').click(); await advance(page, 700); await page.goBack(); await advance(page, 700); await page.goForward(); await advance(page, 700); }
     await expect(scene).toHaveAttribute('data-bloom', '1.000');
     await expect(scene).toHaveAttribute('data-intro', 'skipped');
     expect(await scene.getAttribute('data-intro-started-at')).toBe(started);
@@ -182,7 +187,7 @@ test('Locale changes preserve elapsed opening time and automatic completion reta
   await page.locator('.intro-skip').focus();
   await advance(page, 3300);
   await expect(scene).toHaveAttribute('data-intro', 'complete');
-  await expect(page.locator('#index-perch')).toBeFocused();
+  await expect(page.locator('#index-save-slot')).toBeFocused();
   const duration = await scene.evaluate(host => Number((host as HTMLElement).dataset.introEndedAt) - Number((host as HTMLElement).dataset.introStartedAt));
   expect(duration).toBeLessThan(3450);
 });

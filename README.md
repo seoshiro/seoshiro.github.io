@@ -27,10 +27,10 @@ The ordinary preview serves `dist` on localhost:5317. Release browser tests serv
 
 - `src/soft-lotus/`: React state, continuous Three.js flower, GSAP/Lenis timing, typography and accessible navigation.
 - `src/content.ts`: actual project facts, screenshots, evidence and translated cases.
-- `scripts/soft-page.ts`: useful static homepage; `scripts/generate.ts`: all 40 HTML routes.
+- `scripts/soft-page.ts`: useful static homepage; `scripts/generate.ts`: all 43 HTML routes.
 - `art/soft-lotus/`: unchanged Tripo master, editable Blender source, preparation and geometry audits.
 - `public/models/soft-lotus-*.glb`: compressed desktop/mobile models; same-model posters for loading/failure.
-- `tests/soft-lotus.browser.ts`: 14 complete browser scenarios, including all legacy cases and actual mesh picking.
+- `tests/soft-lotus.browser.ts`: project flows, locale routes, fallbacks and actual mesh picking.
 - `.github/workflows/publish.yml`: checks the exact source revision before publishing to GitHub Pages.
 
 [Implementation, provenance and budget](docs/soft-lotus-v2/README.md) · [Model](docs/soft-lotus-v2/MODEL.md) · [Verification and limitations](docs/soft-lotus-v2/QA.md)
@@ -40,3 +40,8 @@ One Tripo H3.1 generation cost 6 credits out of the authorized 60-credit project
 ## History and recovery
 
 The former rigid-lotus implementation remains in Git history and its source folders for traceability. It is superseded by V2. Backup `backup/pre-soft-lotus-v2-2026-11-04` preserves commit `81da4e53946c62f37ecc71ccd59ab11161f4fc19`; the original pre-lotus backup is also retained. No unrelated project repository was modified.
+
+
+## SAVE SLOT promotion
+
+SAVE SLOT now leads the first petal and complete project catalog. PERCH remains available in the catalog and at its existing case URL. See [the integration and verification record](docs/save-slot-integration.md).

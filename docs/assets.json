@@ -139,5 +139,26 @@
     "height": 1000,
     "bytes": 42532,
     "crop": null
+  },
+  {
+    "file": "save-slot.webp",
+    "width": 1366,
+    "height": 768,
+    "bytes": 84296,
+    "crop": null
+  },
+  {
+    "file": "save-slot-preview.webp",
+    "width": 1366,
+    "height": 768,
+    "bytes": 84296,
+    "crop": null
+  },
+  {
+    "file": "save-slot-detail.webp",
+    "width": 1366,
+    "height": 768,
+    "bytes": 61344,
+    "crop": null
   }
 ]

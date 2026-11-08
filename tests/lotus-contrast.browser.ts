@@ -34,9 +34,9 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1165, height: 747
         }
       };
       await measure('overview');
-      for (const id of ['perch', 'selvedge', 'forme', 'about', 'contact']) {
+      for (const id of ['save-slot', 'selvedge', 'forme', 'about', 'contact']) {
         await page.locator(`#index-${id}`).click(); await measure(id);
-        if (['perch', 'selvedge', 'forme'].includes(id)) {
+        if (['save-slot', 'selvedge', 'forme'].includes(id)) {
           await page.locator(`#preview-case-${id}`).click(); await measure('case');
           await page.locator('.reader-top button').click();
         }

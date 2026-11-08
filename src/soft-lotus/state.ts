@@ -1,8 +1,8 @@
 import { validLocale, type Locale } from '../content.ts';
 
-export const petalIds = ['perch', 'selvedge', 'forme', 'about', 'contact'] as const;
+export const petalIds = ['save-slot', 'selvedge', 'forme', 'about', 'contact'] as const;
 export type PetalId = typeof petalIds[number];
-export type FeaturedId = Extract<PetalId, 'perch' | 'selvedge' | 'forme'>;
+export type FeaturedId = Extract<PetalId, 'save-slot' | 'selvedge' | 'forme'>;
 export type View = 'overview' | 'selected' | 'case';
 export type ResourceState = 'pending' | 'ready' | 'failed';
 
@@ -33,7 +33,7 @@ export function isPetal(value: unknown): value is PetalId {
 }
 
 export function isFeatured(value: unknown): value is FeaturedId {
-  return value === 'perch' || value === 'selvedge' || value === 'forme';
+  return value === 'save-slot' || value === 'selvedge' || value === 'forme';
 }
 
 export function routeFromURL(url: URL, fallback: Locale): SceneRoute {
