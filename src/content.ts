@@ -224,7 +224,7 @@ export const copy: Record<Locale, Copy> = {
     motion: "Animation",
     motionOff: "Pause animation",
     motionOn: "Play animation",
-    eyebrow: "FULLSTACK · REACT · TYPESCRIPT · NODE.JS · POSTGRESQL",
+    eyebrow: "FULLSTACK · REACT · TYPESCRIPT · NODE.JS",
     name: "Beibars Ileskhan",
     heroLine: "Ideas take\nshape.",
     intro:
@@ -442,7 +442,7 @@ export const copy: Record<Locale, Copy> = {
     motion: "Анимация",
     motionOff: "Остановить анимацию",
     motionOn: "Включить анимацию",
-    eyebrow: "FULLSTACK · REACT · TYPESCRIPT · NODE.JS · POSTGRESQL",
+    eyebrow: "FULLSTACK · REACT · TYPESCRIPT · NODE.JS",
     name: "Бейбарс Илесхан",
     heroLine: "Придаю идеям\nформу.",
     intro:
@@ -659,7 +659,7 @@ export const copy: Record<Locale, Copy> = {
     motion: "Анимация",
     motionOff: "Анимацияны тоқтату",
     motionOn: "Анимацияны қосу",
-    eyebrow: "FULLSTACK · REACT · TYPESCRIPT · NODE.JS · POSTGRESQL",
+    eyebrow: "FULLSTACK · REACT · TYPESCRIPT · NODE.JS",
     name: "Бейбарыс Ілесхан",
     heroLine: "Идеяға пішін\nберемін.",
     intro:

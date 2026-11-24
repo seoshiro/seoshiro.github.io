@@ -4,7 +4,7 @@ export const sceneCopy = {
   ru: {
     skipIntro: 'Пропустить вступление',
     closeWork: 'Закрыть список',
-    intro: 'Я Бейбарс, fullstack-разработчик. Делаю веб-продукты от интерфейса до базы данных и довожу их до продакшена, используя ИИ-инструменты.',
+    intro: 'Я Бейбарс, fullstack-разработчик: веб-продукты от интерфейса до базы данных.',
     flagshipLabel: 'Флагманский проект', flagshipShort: 'service desk для колледжа: RBAC, чат на Socket.IO, SLA, PostgreSQL + Prisma',
     flagshipDetail: 'Роли и RBAC, чат в реальном времени на Socket.IO, SLA-контроль, база знаний на трёх языках с ассистентом, PDF-отчёты. React, Express, PostgreSQL и Prisma; Vercel, Render, Neon.',
     flagshipDemo: 'Живое демо', flagshipCode: 'Код',
@@ -25,7 +25,7 @@ export const sceneCopy = {
   en: {
     skipIntro: 'Skip introduction',
     closeWork: 'Close project list',
-    intro: 'I’m Beibars, a fullstack developer. I build web products from interface to database and ship them to production, using AI tools in my workflow.',
+    intro: 'I’m Beibars, a fullstack developer: web products from interface to database.',
     flagshipLabel: 'Flagship project', flagshipShort: 'a college service desk: RBAC, Socket.IO chat, SLA tracking, PostgreSQL + Prisma',
     flagshipDetail: 'Roles and RBAC, real-time chat over Socket.IO, SLA tracking, a three-language knowledge base with an assistant, PDF reports. React, Express, PostgreSQL and Prisma; Vercel, Render, Neon.',
     flagshipDemo: 'Live demo', flagshipCode: 'Code',
@@ -46,7 +46,7 @@ export const sceneCopy = {
   kk: {
     skipIntro: 'Кіріспені өткізу',
     closeWork: 'Жобалар тізімін жабу',
-    intro: 'Мен Бейбарспын, fullstack-әзірлеушімін. Веб-өнімдерді интерфейстен дерекқорға дейін жасап, продакшенге жеткіземін, жұмыста ЖИ құралдарын қолданамын.',
+    intro: 'Мен Бейбарспын, fullstack-әзірлеуші: интерфейстен дерекқорға дейін веб-өнімдер.',
     flagshipLabel: 'Негізгі жоба', flagshipShort: 'колледж service desk-і: RBAC, Socket.IO чаты, SLA, PostgreSQL + Prisma',
     flagshipDetail: 'Рөлдер мен RBAC, Socket.IO арқылы нақты уақыттағы чат, SLA бақылауы, үш тілдегі білім базасы мен көмекші, PDF есептер. React, Express, PostgreSQL және Prisma; Vercel, Render, Neon.',
     flagshipDemo: 'Тірі демо', flagshipCode: 'Код',
