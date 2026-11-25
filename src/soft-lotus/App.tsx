@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useReducer, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { gsap } from 'gsap';
 import { copy, dimensions, pageHref, projects, validLocale, type Locale } from '../content.ts';
-import { flagships, sceneCopy } from './copy.ts';
+import { sceneCopy } from './copy.ts';
 import { caseLabels, caseNotes, projectLabels } from '../case-notes.ts';
 import { softLotusAsset } from './asset.ts';
 import { RevealText } from './RevealText.tsx';
@@ -368,7 +368,7 @@ export function App() {
           </svg>
           <p role="status">{loadLabel}{percent !== undefined ? ` · ${percent}%` : ''}</p><progress className="scene-loading" aria-label={loadLabel} max={100} value={percent} />
         </div>}
-        <div className="scene-bottom"><div>{introPlaying ? <button type="button" className="intro-skip" onClick={() => { runtime.current?.skipIntro(); document.getElementById('index-save-slot')?.focus({ preventScroll: true }); }}>{s.skipIntro} <span aria-hidden="true">· Esc</span></button> : <p role="status">{state.model === 'failed' ? s.fallback : state.model === 'ready' ? s.ready : ''}</p>}</div><aside className="hero-flagship" aria-labelledby="flagship-title"><p className="eyebrow flagship-label" id="flagship-title">{s.flagshipLabel}</p>{flagships.map(f => <div className="flagship-entry" key={f.id} title={s[f.detail]}><p className="flagship-title"><strong>{f.name}</strong> <span className="flagship-short">— {s[f.short]}</span></p><div className="flagship-links"><a href={f.demo} target="_blank" rel="noreferrer">{s.flagshipDemo} ↗</a><a href={f.code} target="_blank" rel="noreferrer">{s.flagshipCode} ↗</a></div></div>)}</aside><button type="button" aria-pressed={state.reducedMotion} onClick={() => dispatch({ type: 'motion', reduced: !state.reducedMotion })}>{s.motion}</button></div>
+        <div className="scene-bottom"><div>{introPlaying ? <button type="button" className="intro-skip" onClick={() => { runtime.current?.skipIntro(); document.getElementById('index-save-slot')?.focus({ preventScroll: true }); }}>{s.skipIntro} <span aria-hidden="true">· Esc</span></button> : <p role="status">{state.model === 'failed' ? s.fallback : state.model === 'ready' ? s.ready : ''}</p>}</div><button type="button" aria-pressed={state.reducedMotion} onClick={() => dispatch({ type: 'motion', reduced: !state.reducedMotion })}>{s.motion}</button></div>
       </div>
       <nav id="scene-index" className="scene-index" inert={state.view === 'case'} aria-label={`${s.scene} - ${s.all}`}><span id="work" />{petalIds.map((id, index) => <button id={`index-${id}`} type="button" key={id} aria-pressed={state.active === id} onClick={event => select(event, id)}><span>0{index + 1}</span> {petalName(id)}</button>)}<button id="index-all" type="button" aria-haspopup="dialog" aria-expanded={workOpen} aria-controls="work-browser" onClick={event => openWork(event.currentTarget)}>{s.all}</button></nav>
       <dialog ref={workDialog} id="work-browser" className="work-browser" aria-labelledby="work-browser-title" data-native-scroll onKeyDown={containWorkTab} onCancel={event => { event.preventDefault(); event.stopPropagation(); setWorkOpen(false); }} onClose={event => { if (!event.currentTarget.open && !workOpenRef.current) setWorkOpen(false); }}>

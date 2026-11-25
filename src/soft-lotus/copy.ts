@@ -5,11 +5,6 @@ export const sceneCopy = {
     skipIntro: 'Пропустить вступление',
     closeWork: 'Закрыть список',
     intro: 'Я Бейбарс, fullstack-разработчик: веб-продукты от интерфейса до базы данных.',
-    flagshipLabel: 'Флагманские проекты', flagshipShort: 'service desk для колледжа: RBAC, чат на Socket.IO, SLA, PostgreSQL + Prisma',
-    flagshipDetail: 'Роли и RBAC, чат в реальном времени на Socket.IO, SLA-контроль, база знаний на трёх языках с ассистентом, PDF-отчёты. React, Express, PostgreSQL и Prisma; Vercel, Render, Neon.',
-    hookrelayShort: 'роутер вебхуков на Postgres: очередь SKIP LOCKED, HMAC, ретраи, DLQ и живая песочница',
-    hookrelayDetail: 'Принимает вебхуки, подписывает их HMAC-SHA256, доставляет с экспоненциальными ретраями и очередью недоставленных (DLQ), защищает от SSRF; живая консоль на SSE и публичная песочница. Fastify, Prisma, PostgreSQL, React; Vercel, Render, Neon.',
-    flagshipDemo: 'Живое демо', flagshipCode: 'Код',
     discuss: 'Обсудить проект', work: 'Посмотреть работы', demo: 'Открыть демо',
     aboutWork: 'Беру на себя постановку задачи, выбор инструментов и визуальное направление. Сравниваю результат с брифом, уточняю сценарий и направляю доработку. Код создаю с помощью ИИ; продолжаю учиться писать и понимать его самостоятельно.',
     transfer: 'Загружаем модель', prepare: 'Подготавливаем свет и материалы…',
@@ -28,11 +23,6 @@ export const sceneCopy = {
     skipIntro: 'Skip introduction',
     closeWork: 'Close project list',
     intro: 'I’m Beibars, a fullstack developer: web products from interface to database.',
-    flagshipLabel: 'Flagship projects', flagshipShort: 'a college service desk: RBAC, Socket.IO chat, SLA tracking, PostgreSQL + Prisma',
-    flagshipDetail: 'Roles and RBAC, real-time chat over Socket.IO, SLA tracking, a three-language knowledge base with an assistant, PDF reports. React, Express, PostgreSQL and Prisma; Vercel, Render, Neon.',
-    hookrelayShort: 'a webhook relay on Postgres: SKIP LOCKED queue, HMAC, retries, DLQ and a live sandbox',
-    hookrelayDetail: 'Accepts webhooks, signs them with HMAC-SHA256, delivers with exponential retries and a dead-letter queue, and guards against SSRF; a live SSE console and a public sandbox. Fastify, Prisma, PostgreSQL, React; Vercel, Render, Neon.',
-    flagshipDemo: 'Live demo', flagshipCode: 'Code',
     discuss: 'Discuss a project', work: 'Explore the work', demo: 'Open demo',
     aboutWork: 'I define the task, choose tools and shape the visual direction. I compare the result with the brief, refine the workflow and guide revisions. I create code with AI assistance and continue learning to write and understand it independently.',
     transfer: 'Downloading the model', prepare: 'Preparing light and materials…',
@@ -51,11 +41,6 @@ export const sceneCopy = {
     skipIntro: 'Кіріспені өткізу',
     closeWork: 'Жобалар тізімін жабу',
     intro: 'Мен Бейбарспын, fullstack-әзірлеуші: интерфейстен дерекқорға дейін веб-өнімдер.',
-    flagshipLabel: 'Негізгі жобалар', flagshipShort: 'колледж service desk-і: RBAC, Socket.IO чаты, SLA, PostgreSQL + Prisma',
-    flagshipDetail: 'Рөлдер мен RBAC, Socket.IO арқылы нақты уақыттағы чат, SLA бақылауы, үш тілдегі білім базасы мен көмекші, PDF есептер. React, Express, PostgreSQL және Prisma; Vercel, Render, Neon.',
-    hookrelayShort: 'Postgres негізіндегі вебхук роутері: SKIP LOCKED кезегі, HMAC, қайта жіберу, DLQ және тірі sandbox',
-    hookrelayDetail: 'Вебхуктарды қабылдап, HMAC-SHA256 арқылы қол қояды, экспоненциалды қайта жіберулермен және DLQ кезегімен жеткізеді, SSRF-тен қорғайды; SSE арқылы тірі консоль және ашық sandbox. Fastify, Prisma, PostgreSQL, React; Vercel, Render, Neon.',
-    flagshipDemo: 'Тірі демо', flagshipCode: 'Код',
     discuss: 'Жобаны талқылау', work: 'Жұмыстарды көру', demo: 'Демоны ашу',
     aboutWork: 'Міндетті анықтап, құралдар мен визуалды бағытты таңдаймын. Нәтижені брифпен салыстырып, сценарийді нақтылаймын және түзетулерді бағыттаймын. Кодты ИИ көмегімен жасаймын, оны өз бетімше жазу мен түсінуді үйреніп жүрмін.',
     transfer: 'Модель жүктелуде', prepare: 'Жарық пен материалдар дайындалуда…',
@@ -72,8 +57,3 @@ export const sceneCopy = {
   },
 } satisfies Record<Locale, Record<string, string>>;
 
-/** Flagship projects shown in the intro card and the live scene strip, in display order. */
-export const flagships = [
-  { id: 'aitudesk', name: 'AituDesk', demo: 'https://aitudesk.vercel.app', code: 'https://github.com/seoshiro/aitudesk', short: 'flagshipShort', detail: 'flagshipDetail' },
-  { id: 'hookrelay', name: 'HookRelay', demo: 'https://hookrelay-mu.vercel.app', code: 'https://github.com/seoshiro/hookrelay', short: 'hookrelayShort', detail: 'hookrelayDetail' },
-] as const;

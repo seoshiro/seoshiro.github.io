@@ -77,22 +77,3 @@ body[data-model=failed][data-view=case] .scene-poster{inset:20% auto auto 0;widt
 
 /* The opening can be skipped with a tap or keyboard without blocking navigation. */
 .scene-bottom .intro-skip{padding:8px 0;min-height:44px;color:#4a413a;text-align:left;border-radius:0}.intro-skip span{font-size:.85em}
-/* Flagship project: a card in the static intro, a strip in the live scene's bottom bar */
-.hero-flagship{pointer-events:auto;color:var(--ink,#38332f)}
-.hero-flagship p{margin:0}.hero-flagship .flagship-label{font-size:9px;color:var(--muted,#72675f)}
-.hero-flagship .flagship-title strong{font-family:SoftSerif,Georgia,serif;font-weight:400;font-size:18px}
-.hero-flagship .flagship-links{display:flex;gap:16px}.hero-flagship .flagship-links a{display:inline-flex;align-items:center;text-decoration:underline}
-.scene-introduction .hero-flagship{margin-top:16px;padding:10px 14px 4px;border:1px solid #d8cabe;background:#fbf8f2e6;max-width:46ch;text-align:left;font-size:12px}
-.scene-introduction .hero-flagship .flagship-detail{font-size:11.5px;line-height:1.55;margin-top:6px;color:#4f4740}
-.scene-bottom .hero-flagship{display:flex;align-items:center;gap:6px 16px;flex-wrap:wrap;justify-content:center;padding:2px 14px;border:1px solid #d8cabe;background:#fbf8f2eb;font-size:11px;color:#4f4740;max-width:min(62vw,860px)}
-.scene-bottom .hero-flagship .flagship-links a{min-height:36px}
-/* Two flagships: stacked with a hairline in the intro card, side by side in the live strip */
-.scene-introduction .hero-flagship .flagship-entry+.flagship-entry{margin-top:10px;padding-top:10px;border-top:1px solid #e4d9cc}
-.scene-bottom .hero-flagship{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:center;width:min(62vw,860px)}
-.scene-bottom .hero-flagship .flagship-label{grid-row:span 2}
-.scene-bottom .hero-flagship .flagship-entry{display:flex;align-items:center;justify-content:space-between;gap:16px;min-width:0}
-.scene-bottom .hero-flagship .flagship-entry .flagship-title{flex:1;min-width:0;max-width:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.scene-bottom .hero-flagship .flagship-entry+.flagship-entry{border-top:1px solid #e4d9cc}
-.soft-stage:not([data-view=overview]) .scene-bottom .hero-flagship,.soft-stage[data-work-open=true] .scene-bottom .hero-flagship{visibility:hidden}
-@media(max-width:1100px){.scene-bottom .hero-flagship .flagship-short{display:none}}
-@media(max-width:700px){.scene-bottom{flex-wrap:wrap}.scene-bottom .hero-flagship{order:-1;flex-basis:100%;max-width:none;padding:0 8px;gap:4px 12px;font-size:10px}.scene-bottom .hero-flagship .flagship-label{display:none}.scene-bottom .hero-flagship .flagship-title strong{font-size:14px}.scene-bottom .hero-flagship .flagship-title strong::before{content:'★ ';font-size:9px}.scene-bottom .hero-flagship{grid-template-columns:minmax(0,1fr);width:auto}.scene-bottom .hero-flagship .flagship-links a{min-height:32px}}
